@@ -1,0 +1,13 @@
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    enp12s0:
+      dhcp4: no
+      addresses:
+        - 192.168.0.179/24
+      routes:
+        - to: default
+          via: 192.168.0.1
+      nameservers:
+        addresses: [8.8.8.8, 1.1.1.1] # Example DNS servers, change if needed

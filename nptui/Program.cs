@@ -1,0 +1,349 @@
+﻿using System;
+using System.CodeDom.Compiler;
+using System.ComponentModel.DataAnnotations;
+using System.IO;
+using System.Net.Mail;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Xml;
+
+namespace NPTUI
+{
+    class NPTUI
+    {
+        public static List<Ethernet> ethernets = new List<Ethernet>();
+        public static string netplanPath = "";
+        public static void Main(string[] args)
+        {
+            Console.Clear();
+            netplanPath = "";
+            if (args.Length > 0) netplanPath = args[0];
+            if (netplanPath != "" && netplanPath.StartsWith('/')) Load(netplanPath);
+            else netplanPath = "";
+
+
+            MainMenu();
+
+        }
+
+        public static void MainMenu()
+        {
+            int selected_item = 0;
+            string[] menu_options = ["List Interfaces", "Load Netplan File", "About NPTUI", "Save", "Exit"];
+            while (true)
+            {
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Clear();
+                Console.WriteLine("\n");
+                Console.WriteLine($"    NPTUI [v1.0] (netplanPath: {netplanPath})");
+                Console.WriteLine($"");
+                for (int i = 0; i < menu_options.Length; i++)
+                {
+                    if (i == selected_item)
+                    {
+                        Console.BackgroundColor = ConsoleColor.White;
+                        Console.ForegroundColor = ConsoleColor.Black;
+                    } else {
+                        Console.BackgroundColor = ConsoleColor.Black;
+                        Console.ForegroundColor = ConsoleColor.White;
+                    }
+                    Console.WriteLine($"    {i + 1}. {menu_options[i].PadRight(32)}");
+                }
+
+
+
+                switch (Console.ReadKey().Key)
+                {
+                    case ConsoleKey.UpArrow:
+                        selected_item -= 1;
+                        if (selected_item < 0) selected_item = menu_options.Length - 1;
+                        break;
+                    case ConsoleKey.DownArrow:
+                        selected_item += 1;
+                        if (selected_item >= menu_options.Length) selected_item = 0;
+                        break;
+                    case ConsoleKey.Enter:
+                    case ConsoleKey.Spacebar:
+                        switch (selected_item)
+                        {
+                            case 0:
+                                InterfacesMenu();
+                                break;
+                            case 1:
+                                Console.Clear();
+                                Console.Write("Enter path: ");
+                                netplanPath = Console.ReadLine();
+                                if (File.Exists(netplanPath))
+                                {
+                                    if (netplanPath.StartsWith('/')) Load(netplanPath);
+                                    else { Console.WriteLine("NPTUI requires an absolute file path, not relative (your path must start with a /). Press ENTER to continue"); netplanPath = ""; Console.ReadLine(); }
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"No such file {netplanPath}. Would you like to create one? [Y/n]");
+                                    if (Console.ReadKey().Key == ConsoleKey.Y)
+                                    {
+                                        File.WriteAllText(netplanPath, "network:\n  version: 2");
+                                    } else netplanPath = "";
+                                }
+                                break;
+                            case 2:
+                                Console.Clear();
+                                Console.WriteLine($"NetPlan Terminal User Interface (NPTUI)\nv1.0 | 28-05-25 | By Simmo <3");
+                                Console.WriteLine("Press ENTER to continue");
+                                Console.ReadLine();
+                                break;
+                            case 3:
+                                Console.Clear();
+                                Console.WriteLine($"\n   ==== Preview ({netplanPath}) ".PadRight(64, '='));
+                                Save(ethernets.ToArray(), netplanPath, previewOnly: true);
+                                Console.WriteLine("\n   ".PadRight(64, '=') + "\n");
+                                bool waitingForConfirmation = true;
+                                bool commitToSave = false;
+                                while (waitingForConfirmation)
+                                {
+                                    Console.Write("Are you sure you want to save this netplan data? [Y/n] ");
+                                    string response = Console.ReadLine().Replace(" ", "");
+                                    if (response.ToLower() == "n") { commitToSave = false; waitingForConfirmation = false; }
+                                    else if (response == "Y") { commitToSave = true; waitingForConfirmation = false; }
+                                }
+                                if (commitToSave) {
+                                    Save(ethernets.ToArray(), netplanPath, previewOnly: false);
+                                    Console.WriteLine($"Saved netplan config to {netplanPath}\nPress ENTER to continue");
+                                } else {
+                                    Console.WriteLine($"Config NOT saved.\nPress ENTER to continue");
+                                }
+                                Console.ReadLine();
+                                break;
+                            case 4:
+                                Console.BackgroundColor = ConsoleColor.Black;
+                                Console.ForegroundColor = ConsoleColor.White;
+                                Environment.Exit(0);
+                                break;
+                        }
+                        break;
+                }
+            }
+        }
+
+        public static void InterfacesMenu()
+        {
+            int selected_item = 0;
+            bool refreshMenuOptions = true;
+            string[] menu_options = [];
+            while (true)
+            {
+                if (refreshMenuOptions)
+                {
+                    List<string> menuOptionsList = new List<string>();
+                    foreach (Ethernet ethernet in ethernets) menuOptionsList.Add(ethernet.name);
+                    menuOptionsList.Add("");
+                    menuOptionsList.Add("+ Add Interface");
+                    menuOptionsList.Add("< Back To Menu");
+                    menu_options = menuOptionsList.ToArray();
+                    refreshMenuOptions = false;
+                }
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Clear();
+                Console.WriteLine("\n");
+                Console.WriteLine($"    NPTUI [v1.0] (netplanPath: {netplanPath})");
+                Console.WriteLine($"");
+                for (int i = 0; i < menu_options.Length; i++)
+                {
+                    if (i == selected_item)
+                    {
+                        Console.BackgroundColor = ConsoleColor.White;
+                        Console.ForegroundColor = ConsoleColor.Black;
+                    }
+                    else
+                    {
+                        Console.BackgroundColor = ConsoleColor.Black;
+                        Console.ForegroundColor = ConsoleColor.White;
+                    }
+                    Console.WriteLine($"    {i + 1}. {menu_options[i].PadRight(32)}");
+                }
+
+
+
+                switch (Console.ReadKey().Key)
+                {
+                    case ConsoleKey.UpArrow:
+                        selected_item -= 1;
+                        if (selected_item < 0) selected_item = menu_options.Length - 1;
+                        break;
+                    case ConsoleKey.DownArrow:
+                        selected_item += 1;
+                        if (selected_item >= menu_options.Length) selected_item = 0;
+                        break;
+                    case ConsoleKey.Enter:
+                    case ConsoleKey.Spacebar:
+                        if (selected_item == menu_options.Length - 1) return;
+                        else if (menu_options[selected_item].Contains("Add Interface"))
+                        {
+                            Console.Clear();
+                            Console.Write($"Enter interface name: ");
+                            string new_name = Console.ReadLine().Replace(" ", "");
+                            if (!menu_options.Contains(new_name))
+                            {
+                                ethernets.Add(new Ethernet($"    {new_name}\n      dhcp4: true"));
+                                refreshMenuOptions = true;
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+
+        public static void Load(string netplanPath)
+        {
+            Console.WriteLine($"Loading netplan config from {netplanPath}");
+            string[] lines = File.ReadAllText(netplanPath).Split('\n');
+            int indent_count = lines[Utils.GetLineNumber(lines, "version")].Split("version:")[0].Length;
+            string minimum_indent = "";
+            for (int i = 0; i < indent_count * 3; i++) minimum_indent += " ";
+            if (Utils.GetLineNumber(lines, "ethernets") > -1)
+            {
+                string workingLines = "";
+                for (int i = Utils.GetLineNumber(lines, "ethernets") + 1; i < lines.Length; i++)
+                {
+                    // Check these two conditions. If both eval to true, then we have a non-blank line that is
+                    // not indented enough, so we must have exited the ethernets section
+                    if (lines[i] != "" && Utils.GetIndentationLevel(lines[i], indent_count) < 2) break;
+                    else if (lines[i] != "" && Utils.GetIndentationLevel(lines[i], indent_count) == 2)
+                    {
+                        ethernets.Add(new Ethernet(workingLines));
+                        workingLines = "";
+                    }
+                    else workingLines += lines[i] + "\n";
+                }
+                if (workingLines.Length > 0) ethernets.Add(new Ethernet(workingLines));
+            }
+        }
+
+        public static void Save(Ethernet[] ethernets, string netplanPath, int indent = 2, bool previewOnly = true)
+        {
+            string tab = "";
+            for (int i = 0; i < indent; i++) tab += " ";
+            string finished_product = "network:\n";
+            finished_product += $"{tab}version: 2\n";
+            // finished_product += $"{tab}renderer: networkd\n";
+            if (ethernets.Length > 0)
+            {
+                finished_product += $"{tab}ethernets:\n";
+                foreach (Ethernet e in ethernets) finished_product += e.ToYaml() + "\n";
+            }
+            if (previewOnly) Console.WriteLine(finished_product);
+            else File.WriteAllText(netplanPath, finished_product);
+        }
+    }
+
+    public class Ethernet
+    {
+        public string dhcp4;
+        public bool ip4;
+        public List<string> addresses = new List<string>();
+        public List<string> nameservers = new List<string>();
+        public List<string> routes = new List<string>();
+        public string name;
+
+        public Ethernet(string data, int indent = 2)
+        {
+            // Console.WriteLine($"I'm working with: {data}");
+            string[] lines = data.Split("\n");
+            name = lines[0].Split(':')[0].Replace(" ", "");
+            if (data.ToLower().Contains("dhcp4: true") || data.ToLower().Contains("dhcp4: yes")) dhcp4 = "yes";
+            else dhcp4 = "no";
+
+            if (dhcp4 == "yes") addresses = [];
+            else
+            {
+                if (Utils.GetLineNumber(lines, "addresses") > -1)
+                {
+                    int i = Utils.GetLineNumber(lines, "addresses") + 1;
+                    while (lines[i].Replace(" ", "").StartsWith("-"))
+                    {
+                        addresses.Add(lines[i].Split(" ")[lines[i].Split(" ").Length - 1]);
+                        i += 1;
+                    }
+                }
+                if (Utils.GetLineNumber(lines, "nameservers") > -1)
+                {
+                    int i = Utils.GetLineNumber(lines, "nameservers") + 1;
+                    while (!lines[i].Split(':')[0].EndsWith("addresses")) i += 1;
+                    nameservers = new List<string>(lines[i].Split(':')[1].Split('#')[0].Replace("[", "").Replace("]", "").Split(","));
+                }
+                if (Utils.GetLineNumber(lines, "routes") > -1)
+                {
+                    int i = Utils.GetLineNumber(lines, "routes") + 1;
+                    while (lines[i].Replace(" ", "") == "") i += 1;
+                    while (lines[i].Replace(" ", "").Contains("-to:") && i < lines.Length)
+                    {
+                        routes.Add(lines[i].Split("to:")[1] + "%" + lines[i+1].Split("via:")[1]);
+                        i += 2;
+                        while (lines[i].Replace(" ", "") == "" && i < lines.Length) i += 1;
+                    }
+                }
+            }
+        }
+
+        public string ToYaml(int indent = 2)
+        {
+            string tab = "";
+            for (int i = 0; i < indent; i++) tab += " ";
+            string output = @$"{tab}{tab}{name}
+{tab}{tab}{tab}dhcp4: {dhcp4}";
+            if (addresses.Count() > 0 && dhcp4 == "no") {
+                output += $"\n{tab}{tab}{tab}addresses: ";
+                foreach (string s in addresses) output += $"\n{tab}{tab}{tab}{tab}- {s}";
+            }
+            if (dhcp4 == "no")
+            {
+                output += @$"
+{tab}{tab}{tab}nameservers:
+{tab}{tab}{tab}{tab}addresses: [";
+                foreach (string s in nameservers) output += s + ",";
+                if (nameservers.Count > 0) output = output.TrimEnd(',');
+                output += "]";
+            }
+            if (routes.Count > 0)
+            {
+                output += @$"
+{tab}{tab}{tab}routes:";
+                foreach (string r in routes) output += $"\n{tab}{tab}{tab}{tab}- to: {r.Split("%")[0]}\n{tab}{tab}{tab}{tab}  via: {r.Split("%")[1]}";
+            }
+            return output;
+        }
+    }
+
+    public static class Utils
+    {
+        public static int GetLineNumber(string[] lines, string search)
+        {
+            int i = 0;
+            while (i < lines.Length)
+            {
+                if (lines[i].Split(':')[0].EndsWith(search)) return i;
+                else i += 1;
+            }
+            return -1;
+        }
+
+        public static int GetIndentationLevel(string line, int indent = 2)
+        {
+            for (int i = 0; i < line.Length; i++)
+            {
+                if (line[i] != ' ') return i;
+                else i += indent;
+            }
+            return -1;
+        }
+    }
+}
+
+// network:
+//   version: 2
+//   ethernets:
+//     enp12s0:
+//       dhcp4: true
