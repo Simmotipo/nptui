@@ -601,14 +601,16 @@ namespace NPTUI
         {
             ethernets = new List<Ethernet>();
             Console.WriteLine($"Loading netplan config from {netplanPath}");
+            string[] lines = [];
             try
             {
-                string[] lines = File.ReadAllText(netplanPath).Split('\n');
+                lines = File.ReadAllText(netplanPath).Split('\n');
             }
             catch
             {
                 Console.WriteLine("An error occurred trying to read that file. Try sudo?");
                 Console.ReadLine();
+                return;
             }
             int indent_count = lines[Utils.GetLineNumber(lines, "version")].Split("version:")[0].Length;
             string minimum_indent = "";
