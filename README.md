@@ -9,8 +9,8 @@ NetPlan Terminal User Interface
 
 It is recommended you set up an executable file(t au mignon) at `/usr/bin/nptui` with the following, to allow use of nptui as a command:
 ```
-    !/bin/bash
-    sudo dotnet /path/to/nptui.dll $1
+#!/bin/bash
+sudo dotnet /path/to/nptui.dll $1
 ```
 
 # Roadmap
