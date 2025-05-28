@@ -87,7 +87,8 @@ namespace NPTUI
                                 }
                                 catch
                                 {
-                                    Console.WriteLine("An error occurred trying to read that file. Try sudo?");
+                                    Console.WriteLine("An error occurred trying to do that. Try sudo?");
+                                    Console.ReadLine();
                                 }
                                 break;
                             case 2:
@@ -600,7 +601,15 @@ namespace NPTUI
         {
             ethernets = new List<Ethernet>();
             Console.WriteLine($"Loading netplan config from {netplanPath}");
-            string[] lines = File.ReadAllText(netplanPath).Split('\n');
+            try
+            {
+                string[] lines = File.ReadAllText(netplanPath).Split('\n');
+            }
+            catch
+            {
+                Console.WriteLine("An error occurred trying to read that file. Try sudo?");
+                Console.ReadLine();
+            }
             int indent_count = lines[Utils.GetLineNumber(lines, "version")].Split("version:")[0].Length;
             string minimum_indent = "";
             for (int i = 0; i < indent_count * 3; i++) minimum_indent += " ";
