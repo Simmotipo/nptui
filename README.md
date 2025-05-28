@@ -20,6 +20,9 @@ sudo dotnet /path/to/nptui.dll $1
 - Will host it in my own apt repo at some point
 
 # Changelog
+# v1.2 | 28-05-25
+- OK now you can also route so yeh
+
 # v1.1 | 28-05-25
 - Can configure nameservers now
 
