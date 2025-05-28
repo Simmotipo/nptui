@@ -16,7 +16,7 @@ NetPlan Terminal User Interface
 
 # Changelog
 # v1.3 | 28-05-25
-- Tell user to sudo if cannot read file.
+- Tell user to sudo if cannot read/write file.
 
 # v1.2 | 28-05-25
 - OK now you can also route so yeh
