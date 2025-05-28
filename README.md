@@ -8,9 +8,10 @@ NetPlan Terminal User Interface
 - sudo dotnet nptui.dll [optional: /path/to/netplan/file]
 
 It is recommended you set up an executable file(t au mignon) at `/usr/bin/nptui` with the following, to allow use of nptui as a command:
+```
     !/bin/bash
     sudo dotnet /path/to/nptui.dll $1
-
+```
 
 # Roadmap
 - Does not yet support creation or edit of general routes (supports loading/preserving them, but does not show them in UI, or allow editing of them)
