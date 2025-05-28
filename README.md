@@ -14,7 +14,8 @@ sudo dotnet /path/to/nptui.dll $1
 ```
 
 # Roadmap
-- Does not yet support creation or edit of general routes (supports loading/preserving them, but does not show them in UI, or allow editing of them)
+- Need to neaten up the code lol
+- Will host it in my own apt repo at some point
 
 # Changelog
 # v1.1 | 28-05-25

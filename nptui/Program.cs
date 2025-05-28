@@ -1,17 +1,11 @@
 ﻿using System;
-using System.CodeDom.Compiler;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
-using System.Net.Mail;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Xml;
 
 namespace NPTUI
 {
     class NPTUI
     {
-        public static string nptui_version = "v1.1";
+        public static string nptui_version = "v1.2";
         public static string nptui_date = "28-05-25";
         public static List<Ethernet> ethernets = new List<Ethernet>();
         public static string netplanPath = "";
@@ -90,7 +84,7 @@ namespace NPTUI
                                 break;
                             case 2:
                                 Console.Clear();
-                                Console.WriteLine($"NetPlan Terminal User Interface (NPTUI)\n{nptui_version} | {nptui_date} | By Simmo <3");
+                                Console.WriteLine($"NetPlan Terminal User Interface (NPTUI)\n{nptui_version} | {nptui_date} | By Simmo <3\nhttps://github.com/simmotipo/nptui");
                                 Console.WriteLine("Press ENTER to continue");
                                 Console.ReadLine();
                                 break;
@@ -283,9 +277,18 @@ namespace NPTUI
                         {
                             e.addresses.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
                             refreshMenuOptions = true;
-                        } else if (menu_options[selected_item].Contains("Nameserver "))
+                        }
+                        else if (menu_options[selected_item].Contains("Nameserver "))
                         {
                             e.nameservers.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
+                            refreshMenuOptions = true;
+                        }
+                        else if (menu_options[selected_item].Contains("Gateway "))
+                        {
+                            foreach (string route in e.routes)
+                            {
+                                if (route.Contains("default")) { e.routes.Remove(route); break; }
+                            }
                             refreshMenuOptions = true;
                         }
                         break;
@@ -307,8 +310,8 @@ namespace NPTUI
                         }
                         else if (menu_options[selected_item].Contains("IPv4 Routes"))
                         {
-                            Console.Write($"Editing IPv4 Routes not yet implemented, sorry!");
-                            string resp = Console.ReadLine();
+                            EditRoutes(e);
+                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("Add Address"))
                         {
@@ -432,6 +435,157 @@ namespace NPTUI
                         break;
                 }
             }
+        }
+
+        public static void EditRoutes(Ethernet e)
+        {
+            int selected_item = 0;
+            bool refreshMenuOptions = true;
+            string[] menu_options = [];
+            while (true)
+            {
+                if (refreshMenuOptions)
+                {
+                    List<string> menuOptionsList = new List<string>();
+                    menuOptionsList.Add("Destination      | via Next Hop         | Metric (-1 = no metric)");
+                    menuOptionsList.Add("".PadRight(48,'-'));
+                    foreach (string route in e.routes) menuOptionsList.Add($"{route.Split("%")[0].PadRight(16)} | via {route.Split("%")[1].PadRight(16)} | (metric {route.Split("%")[2]})".PadRight(48));
+                    menuOptionsList.Add("");
+                    menuOptionsList.Add("+ Add Route");
+                    menuOptionsList.Add("< Back To Menu");
+                    menu_options = menuOptionsList.ToArray();
+                    refreshMenuOptions = false;
+                }
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Clear();
+                Console.WriteLine("\n");
+                Console.WriteLine($"    NPTUI [{nptui_version}] (netplanPath: {netplanPath})");
+                Console.WriteLine($"");
+                for (int i = 0; i < menu_options.Length; i++)
+                {
+                    if (i == selected_item)
+                    {
+                        Console.BackgroundColor = ConsoleColor.White;
+                        Console.ForegroundColor = ConsoleColor.Black;
+                    }
+                    else
+                    {
+                        Console.BackgroundColor = ConsoleColor.Black;
+                        Console.ForegroundColor = ConsoleColor.White;
+                    }
+                    Console.WriteLine($"    {i + 1}. {menu_options[i].PadRight(32)}");
+                }
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"\n    Press 'e', ENTER, or SPACE to Edit/Select entry.");
+                Console.WriteLine($"    Press 'x'. to delete entry.");
+                switch (Console.ReadKey().Key)
+                {
+                    case ConsoleKey.UpArrow:
+                        selected_item -= 1;
+                        if (selected_item < 0) selected_item = menu_options.Length - 1;
+                        break;
+                    case ConsoleKey.DownArrow:
+                        selected_item += 1;
+                        if (selected_item >= menu_options.Length) selected_item = 0;
+                        break;
+                    case ConsoleKey.X:
+                        try
+                        {
+                            e.routes.Remove(ConvertMenuItemToRoute(menu_options[selected_item]));
+                            refreshMenuOptions = true;
+                        }
+                        catch { }
+                        break;
+                    case ConsoleKey.E:
+                    case ConsoleKey.Enter:
+                    case ConsoleKey.Spacebar:
+                        if (selected_item == menu_options.Length - 1) return;
+                        else if (menu_options[selected_item].Contains("Add Route"))
+                        {
+                            Console.Write("Enter Destination [x.x.x.x/xx]");
+                            string resp = Console.ReadLine();
+                            string route = "";
+                            try
+                            {
+                                if (resp == "default" || (resp.Split('.').Length == 4 && resp.Contains('/') && Convert.ToInt32(resp.Split('/')[1]) < 33 && Convert.ToInt32(resp.Split('/')[1]) > 0)) { route += $"{resp}%"; }
+                                else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); break; }
+                            }
+                            catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); break; }
+
+                            Console.Write("Enter Next Hop [x.x.x.x]");
+                            resp = Console.ReadLine();
+                            try
+                            {
+                                if (resp.Split('.').Length == 4 && !resp.Contains('/')) { route += $"{resp}%"; }
+                                else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x? Press ENTER to continue"); Console.ReadLine(); break; }
+                            }
+                            catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x? Press ENTER to continue"); Console.ReadLine(); break; }
+
+                            Console.Write("Provide a Metric? Leave blank or -1 for no metric []");
+                            resp = Console.ReadLine().Replace(" ", "");
+                            if (resp == "") resp = "-1";
+                            try
+                            {
+                                if (Convert.ToInt32(resp) > -2) { route += $"{resp}"; }
+                                else { Console.WriteLine("Invalid metric. Press ENTER to continue"); Console.ReadLine(); break; }
+                            }
+                            catch { Console.WriteLine("Invalid metric."); Console.ReadLine(); break; }
+                            e.routes.Add(route);
+                            refreshMenuOptions = true;
+                        }
+                        else
+                        {
+                            try
+                            {
+                                string current_route = ConvertMenuItemToRoute(menu_options[selected_item]);
+                                Console.Write($"Enter Destination [{current_route.Split('%')[0]}]");
+                                string resp = Console.ReadLine().Replace(" ", "");
+                                if (resp == "") resp = current_route.Split('%')[0];
+                                string route = "";
+                                try
+                                {
+                                    if (resp == "default" || (resp.Split('.').Length == 4 && resp.Contains('/') && Convert.ToInt32(resp.Split('/')[1]) < 33 && Convert.ToInt32(resp.Split('/')[1]) > 0)) { route += $"{resp}%"; }
+                                    else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); break; }
+                                }
+                                catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); break; }
+
+                                Console.Write($"Enter Next Hop [{current_route.Split('%')[1]}]");
+                                resp = Console.ReadLine().Replace(" ", "");
+                                if (resp == "") resp = current_route.Split('%')[1];
+                                try
+                                {
+                                    if (resp.Split('.').Length == 4 && !resp.Contains('/')) { route += $"{resp}%"; }
+                                    else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x? Press ENTER to continue"); Console.ReadLine(); break; }
+                                }
+                                catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x? Press ENTER to continue"); Console.ReadLine(); break; }
+
+                                Console.Write($"Provide a Metric? Leave blank or -1 for no metric [{current_route.Split('%')[2]}]");
+                                resp = Console.ReadLine().Replace(" ", "");
+                                if (resp == "") resp = current_route.Split('%')[2];
+                                try
+                                {
+                                    if (Convert.ToInt32(resp) > -2) { route += $"{resp}"; }
+                                    else { Console.WriteLine("Invalid metric. Press ENTER to continue"); Console.ReadLine(); break; }
+                                }
+                                catch { Console.WriteLine("Invalid metric."); Console.ReadLine(); break; }
+                                e.routes.Add(route);
+                                e.routes.Remove(current_route);
+                                refreshMenuOptions = true;
+                            }catch {}
+                        }
+                        break;
+                }
+            }
+        }
+
+        public static string ConvertMenuItemToRoute(string menu_item)
+        {
+            string source = menu_item.Split('|')[0].Replace(" ", "");
+            string via = menu_item.Split('|')[1].Replace("via", "").Replace(" ", "");
+            string metric = menu_item.Split("(metric ")[1].Replace(" ", "").Replace(")", "");
+            return $"{source}%{via}%{metric}";
         }
 
         public static void Load(string netplanPath)
