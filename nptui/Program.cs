@@ -11,6 +11,8 @@ namespace NPTUI
 {
     class NPTUI
     {
+        public static string nptui_version = "v1.1";
+        public static string nptui_date = "28-05-25";
         public static List<Ethernet> ethernets = new List<Ethernet>();
         public static string netplanPath = "";
         public static void Main(string[] args)
@@ -36,7 +38,7 @@ namespace NPTUI
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Clear();
                 Console.WriteLine("\n");
-                Console.WriteLine($"    NPTUI [v1.0] (netplanPath: {netplanPath})");
+                Console.WriteLine($"    NPTUI [{nptui_version}] (netplanPath: {netplanPath})");
                 Console.WriteLine($"");
                 for (int i = 0; i < menu_options.Length; i++)
                 {
@@ -88,7 +90,7 @@ namespace NPTUI
                                 break;
                             case 2:
                                 Console.Clear();
-                                Console.WriteLine($"NetPlan Terminal User Interface (NPTUI)\nv1.0 | 28-05-25 | By Simmo <3");
+                                Console.WriteLine($"NetPlan Terminal User Interface (NPTUI)\n{nptui_version} | {nptui_date} | By Simmo <3");
                                 Console.WriteLine("Press ENTER to continue");
                                 Console.ReadLine();
                                 break;
@@ -146,7 +148,7 @@ namespace NPTUI
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Clear();
                 Console.WriteLine("\n");
-                Console.WriteLine($"    NPTUI [v1.0] (netplanPath: {netplanPath})");
+                Console.WriteLine($"    NPTUI [{nptui_version}] (netplanPath: {netplanPath})");
                 Console.WriteLine($"");
                 for (int i = 0; i < menu_options.Length; i++)
                 {
@@ -206,7 +208,6 @@ namespace NPTUI
                 if (refreshMenuOptions)
                 {
                     List<string> menuOptionsList = new List<string>();
-                    List<string> menuOptionsKeyList = new List<string>();
                     menuOptionsList.Add($"Name                  | {e.name}".PadRight(64));
                     menuOptionsList.Add($"---- IPv4 Config ".PadRight(64, '-'));
                     menuOptionsList.Add($"DHCP                  | {e.dhcp4}".PadRight(64));
@@ -230,8 +231,15 @@ namespace NPTUI
                         for (int i = 0; i < e.addresses.Count(); i++) menuOptionsList.Add($"Address {i + 1}             | {e.addresses[i]}".PadRight(64));
                         menuOptionsList.Add($"+ Add Address         ".PadRight(64));
                     }
+                    int route_count = 0;
+                    foreach (string route in e.routes) if (!route.Contains("default")) route_count += 1;
+                        menuOptionsList.Add("");
+                    for (int i = 0; i < e.nameservers.Count(); i++) menuOptionsList.Add($"Nameserver {i + 1}          | {e.nameservers[i]}".PadRight(64));
+                    menuOptionsList.Add($"+ Add Nameserver      ".PadRight(64));
+                    menuOptionsList.Add($"---- IPv4 Routing ".PadRight(64, '-'));
+                    menuOptionsList.Add($"IPv4 Routes          | {route_count} custom route(s)".PadRight(64));
                     menuOptionsList.Add("");
-                    menuOptionsList.Add("+ Remove Interface");
+                    menuOptionsList.Add("- Remove Interface");
                     menuOptionsList.Add("< Back To Menu");
                     menu_options = menuOptionsList.ToArray();
                     refreshMenuOptions = false;
@@ -240,7 +248,7 @@ namespace NPTUI
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.Clear();
                 Console.WriteLine("\n");
-                Console.WriteLine($"    NPTUI [v1.0] (netplanPath: {netplanPath})");
+                Console.WriteLine($"    NPTUI [{nptui_version}] (netplanPath: {netplanPath})");
                 Console.WriteLine($"");
                 for (int i = 0; i < menu_options.Length; i++)
                 {
@@ -275,6 +283,10 @@ namespace NPTUI
                         {
                             e.addresses.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
                             refreshMenuOptions = true;
+                        } else if (menu_options[selected_item].Contains("Nameserver "))
+                        {
+                            e.nameservers.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
+                            refreshMenuOptions = true;
                         }
                         break;
                     case ConsoleKey.E:
@@ -287,14 +299,38 @@ namespace NPTUI
                             else e.dhcp4 = "yes";
                             refreshMenuOptions = true;
                         }
+                        else if (menu_options[selected_item].Contains("Name "))
+                        {
+                            Console.Write($"Provide new name [{e.name}]");
+                            string resp = Console.ReadLine();
+                            if (resp != "") { e.name = resp.Replace(" ", ""); refreshMenuOptions = true; }
+                        }
+                        else if (menu_options[selected_item].Contains("IPv4 Routes"))
+                        {
+                            Console.Write($"Editing IPv4 Routes not yet implemented, sorry!");
+                            string resp = Console.ReadLine();
+                        }
                         else if (menu_options[selected_item].Contains("Add Address"))
                         {
                             Console.Write("Provide new IP [x.x.x.x/xx] ");
                             string resp = Console.ReadLine();
-                            try {
-                                if (resp.Split('.').Length == 4 && resp.Contains('/') && Convert.ToInt32(resp.Split('/')[1]) < 33 && Convert.ToInt32(resp.Split('/')[1]) > 0) {e.addresses.Add(resp); refreshMenuOptions = true; }
+                            try
+                            {
+                                if (resp.Split('.').Length == 4 && resp.Contains('/') && Convert.ToInt32(resp.Split('/')[1]) < 33 && Convert.ToInt32(resp.Split('/')[1]) > 0) { e.addresses.Add(resp); refreshMenuOptions = true; }
                                 else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
-                            } catch {Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
+                            }
+                            catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
+                        }
+                        else if (menu_options[selected_item].Contains("Add Nameserver"))
+                        {
+                            Console.Write("Provide new IP [x.x.x.x] ");
+                            string resp = Console.ReadLine();
+                            try
+                            {
+                                if (resp.Split('.').Length == 4) { e.nameservers.Add(resp); refreshMenuOptions = true; }
+                                else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x? Press ENTER to continue"); Console.ReadLine(); }
+                            }
+                            catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x? Press ENTER to continue"); Console.ReadLine(); }
                         }
                         else if (menu_options[selected_item].Contains("Remove Interface"))
                         {
@@ -305,21 +341,46 @@ namespace NPTUI
                                 ethernets.Remove(e);
                                 return;
                             }
-                        } else if (menu_options[selected_item].Contains("Address "))
+                        }
+                        else if (menu_options[selected_item].Contains("Address "))
                         {
                             Console.Write($"Enter new address [{menu_options[selected_item].Split("| ")[1].Split(' ')[0]}] ");
                             string resp = Console.ReadLine();
-                            try {
-                                if (resp.Replace(" ", "") != "" && resp.Split('.').Length == 4 && resp.Contains('/') && Convert.ToInt32(resp.Split('/')[1]) < 33 && Convert.ToInt32(resp.Split('/')[1]) > 0)
+                            try
+                            {
+                                if (resp.Replace(" ", "") != "")
                                 {
-                                    e.addresses.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
-                                    e.addresses.Add(resp);
-                                    refreshMenuOptions = true;
+                                    if (resp.Split('.').Length == 4 && resp.Contains('/') && Convert.ToInt32(resp.Split('/')[1]) < 33 && Convert.ToInt32(resp.Split('/')[1]) > 0)
+                                    {
+                                        e.addresses.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
+                                        e.addresses.Add(resp);
+                                        refreshMenuOptions = true;
+                                    }
+                                    else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
                                 }
-                                else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
-                            } catch {Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
-
-                        } else if (menu_options[selected_item].Contains("Gateway "))
+                            }
+                            catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
+                        }
+                        else if (menu_options[selected_item].Contains("Nameserver "))
+                        {
+                            Console.Write($"Enter new nameserver [{menu_options[selected_item].Split("| ")[1].Split(' ')[0]}] ");
+                            string resp = Console.ReadLine();
+                            try
+                            {
+                                if (resp.Replace(" ", "") != "")
+                                {
+                                    if (resp.Split('.').Length == 4)
+                                    {
+                                        e.nameservers.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
+                                        e.nameservers.Add(resp);
+                                        refreshMenuOptions = true;
+                                    }
+                                    else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x? Press ENTER to continue"); Console.ReadLine(); }
+                                }
+                            }
+                            catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x? Press ENTER to continue"); Console.ReadLine(); }
+                        }
+                        else if (menu_options[selected_item].Contains("Gateway "))
                         {
                             string current_gateway = "";
                             if (menu_options[selected_item].Contains("|")) current_gateway = menu_options[selected_item].Split("| ")[1].Split(' ')[0];
@@ -331,12 +392,13 @@ namespace NPTUI
                                 if (resp.Replace(" ", "") != "" && resp.Split('.').Length == 4)
                                 {
                                     string current_metric = "";
-                                    if (!menu_options[selected_item].Contains("Add")) {
+                                    if (!menu_options[selected_item].Contains("Add"))
+                                    {
                                         foreach (string route in e.routes)
                                         {
                                             if (route.Contains("default"))
                                             {
-                                                if (route.Split("%")[2] != "-1") current_metric = route.Split("%")[2];
+                                                current_metric = route.Split("%")[2];
                                                 break;
                                             }
                                         }
@@ -348,7 +410,8 @@ namespace NPTUI
                                     {
                                         e.routes.Add($"default%{resp}%{metric_resp}");
                                     }
-                                    else {
+                                    else
+                                    {
                                         foreach (string route in e.routes)
                                         {
                                             if (route.Contains("default"))
@@ -448,7 +511,7 @@ namespace NPTUI
                 {
                     int i = Utils.GetLineNumber(lines, "nameservers") + 1;
                     while (!lines[i].Split(':')[0].EndsWith("addresses")) i += 1;
-                    nameservers = new List<string>(lines[i].Split(':')[1].Split('#')[0].Replace("[", "").Replace("]", "").Split(","));
+                    nameservers = new List<string>(lines[i].Split(':')[1].Split('#')[0].Replace("[", "").Replace("]", "").Replace(" ", "").Split(","));
                 }
                 if (Utils.GetLineNumber(lines, "routes") > -1)
                 {
