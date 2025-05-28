@@ -29,7 +29,7 @@ namespace NPTUI
         public static void MainMenu()
         {
             int selected_item = 0;
-            string[] menu_options = ["List Interfaces", "Load Netplan File", "About NPTUI", "Save", "Exit"];
+            string[] menu_options = ["List Interfaces", "Load Netplan File", "About NPTUI", "Preview and Save", "Exit"];
             while (true)
             {
                 Console.BackgroundColor = ConsoleColor.Black;
@@ -50,8 +50,6 @@ namespace NPTUI
                     }
                     Console.WriteLine($"    {i + 1}. {menu_options[i].PadRight(32)}");
                 }
-
-
 
                 switch (Console.ReadKey().Key)
                 {
@@ -110,7 +108,7 @@ namespace NPTUI
                                 }
                                 if (commitToSave) {
                                     Save(ethernets.ToArray(), netplanPath, previewOnly: false);
-                                    Console.WriteLine($"Saved netplan config to {netplanPath}\nPress ENTER to continue");
+                                    Console.WriteLine($"Saved netplan config to {netplanPath}\n Remember to SUDO NETPLAN APPLY after exiting NPTUI! Press ENTER to continue");
                                 } else {
                                     Console.WriteLine($"Config NOT saved.\nPress ENTER to continue");
                                 }
@@ -164,9 +162,6 @@ namespace NPTUI
                     }
                     Console.WriteLine($"    {i + 1}. {menu_options[i].PadRight(32)}");
                 }
-
-
-
                 switch (Console.ReadKey().Key)
                 {
                     case ConsoleKey.UpArrow:
@@ -191,6 +186,186 @@ namespace NPTUI
                                 refreshMenuOptions = true;
                             }
                         }
+                        else if (menu_options[selected_item] != "")
+                        {
+                            foreach (Ethernet e in ethernets) if (e.name == menu_options[selected_item]) { EditInterface(e); break; }
+                            refreshMenuOptions = true;
+                        }
+                        break;
+                }
+            }
+        }
+
+        public static void EditInterface(Ethernet e)
+        {
+            int selected_item = 0;
+            bool refreshMenuOptions = true;
+            string[] menu_options = [];
+            while (true)
+            {
+                if (refreshMenuOptions)
+                {
+                    List<string> menuOptionsList = new List<string>();
+                    List<string> menuOptionsKeyList = new List<string>();
+                    menuOptionsList.Add($"Name                  | {e.name}".PadRight(64));
+                    menuOptionsList.Add($"---- IPv4 Config ".PadRight(64, '-'));
+                    menuOptionsList.Add($"DHCP                  | {e.dhcp4}".PadRight(64));
+                    if (e.dhcp4 == "no")
+                    {
+                        bool found_gateway = false;
+                        foreach (string route in e.routes)
+                        {
+                            if (route.Split("%")[0] == "default")
+                            {
+                                menuOptionsList.Add($"Gateway               | {route.Split("%")[1]}".PadRight(64));
+                                if (route.Split("%")[2] != "-1") menuOptionsList.Add($"---- Metric           | {route.Split("%")[2]}".PadRight(64));
+                                found_gateway = true;
+                                break;
+                            }
+                        }
+                        if (!found_gateway)
+                        {
+                            menuOptionsList.Add($"+ Add Gateway".PadRight(64));
+                        }
+                        for (int i = 0; i < e.addresses.Count(); i++) menuOptionsList.Add($"Address {i + 1}             | {e.addresses[i]}".PadRight(64));
+                        menuOptionsList.Add($"+ Add Address         ".PadRight(64));
+                    }
+                    menuOptionsList.Add("");
+                    menuOptionsList.Add("+ Remove Interface");
+                    menuOptionsList.Add("< Back To Menu");
+                    menu_options = menuOptionsList.ToArray();
+                    refreshMenuOptions = false;
+                }
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Clear();
+                Console.WriteLine("\n");
+                Console.WriteLine($"    NPTUI [v1.0] (netplanPath: {netplanPath})");
+                Console.WriteLine($"");
+                for (int i = 0; i < menu_options.Length; i++)
+                {
+                    if (i == selected_item)
+                    {
+                        Console.BackgroundColor = ConsoleColor.White;
+                        Console.ForegroundColor = ConsoleColor.Black;
+                    }
+                    else
+                    {
+                        Console.BackgroundColor = ConsoleColor.Black;
+                        Console.ForegroundColor = ConsoleColor.White;
+                    }
+                    Console.WriteLine($"    {i + 1}. {menu_options[i].PadRight(32)}");
+                }
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine($"\n    Press 'e', ENTER, or SPACE to Edit/Select entry.");
+                Console.WriteLine($"    Press 'x'. to delete entry.");
+                switch (Console.ReadKey().Key)
+                {
+                    case ConsoleKey.UpArrow:
+                        selected_item -= 1;
+                        if (selected_item < 0) selected_item = menu_options.Length - 1;
+                        break;
+                    case ConsoleKey.DownArrow:
+                        selected_item += 1;
+                        if (selected_item >= menu_options.Length) selected_item = 0;
+                        break;
+                    case ConsoleKey.X:
+                        if (menu_options[selected_item].Contains("Address "))
+                        {
+                            e.addresses.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
+                            refreshMenuOptions = true;
+                        }
+                        break;
+                    case ConsoleKey.E:
+                    case ConsoleKey.Enter:
+                    case ConsoleKey.Spacebar:
+                        if (selected_item == menu_options.Length - 1) return;
+                        else if (menu_options[selected_item].Contains("DHCP"))
+                        {
+                            if (e.dhcp4 == "yes") e.dhcp4 = "no";
+                            else e.dhcp4 = "yes";
+                            refreshMenuOptions = true;
+                        }
+                        else if (menu_options[selected_item].Contains("Add Address"))
+                        {
+                            Console.Write("Provide new IP [x.x.x.x/xx] ");
+                            string resp = Console.ReadLine();
+                            try {
+                                if (resp.Split('.').Length == 4 && resp.Contains('/') && Convert.ToInt32(resp.Split('/')[1]) < 33 && Convert.ToInt32(resp.Split('/')[1]) > 0) {e.addresses.Add(resp); refreshMenuOptions = true; }
+                                else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
+                            } catch {Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
+                        }
+                        else if (menu_options[selected_item].Contains("Remove Interface"))
+                        {
+                            Console.Clear();
+                            Console.Write($"Are you sure you wish to remove this interface? [Y/n]: ");
+                            if (Console.ReadKey().Key == ConsoleKey.Y)
+                            {
+                                ethernets.Remove(e);
+                                return;
+                            }
+                        } else if (menu_options[selected_item].Contains("Address "))
+                        {
+                            Console.Write($"Enter new address [{menu_options[selected_item].Split("| ")[1].Split(' ')[0]}] ");
+                            string resp = Console.ReadLine();
+                            try {
+                                if (resp.Replace(" ", "") != "" && resp.Split('.').Length == 4 && resp.Contains('/') && Convert.ToInt32(resp.Split('/')[1]) < 33 && Convert.ToInt32(resp.Split('/')[1]) > 0)
+                                {
+                                    e.addresses.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
+                                    e.addresses.Add(resp);
+                                    refreshMenuOptions = true;
+                                }
+                                else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
+                            } catch {Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
+
+                        } else if (menu_options[selected_item].Contains("Gateway "))
+                        {
+                            string current_gateway = "";
+                            if (menu_options[selected_item].Contains("|")) current_gateway = menu_options[selected_item].Split("| ")[1].Split(' ')[0];
+                            Console.Write($"Enter new gateway [{current_gateway}] ");
+                            string resp = Console.ReadLine();
+                            if (resp == "") resp = current_gateway;
+                            try
+                            {
+                                if (resp.Replace(" ", "") != "" && resp.Split('.').Length == 4)
+                                {
+                                    string current_metric = "";
+                                    if (!menu_options[selected_item].Contains("Add")) {
+                                        foreach (string route in e.routes)
+                                        {
+                                            if (route.Contains("default"))
+                                            {
+                                                if (route.Split("%")[2] != "-1") current_metric = route.Split("%")[2];
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    Console.Write($"Provide a gateway metric? Enter -1 for no metric [{current_metric}]");
+                                    string metric_resp = Console.ReadLine();
+                                    if (metric_resp == "") metric_resp = current_metric;
+                                    if (menu_options[selected_item].Contains("Add"))
+                                    {
+                                        e.routes.Add($"default%{resp}%{metric_resp}");
+                                    }
+                                    else {
+                                        foreach (string route in e.routes)
+                                        {
+                                            if (route.Contains("default"))
+                                            {
+                                                e.routes.Remove(route);
+                                                break;
+                                            }
+                                        }
+                                        e.routes.Add($"default%{resp}%{metric_resp}");
+                                    }
+                                    refreshMenuOptions = true;
+                                }
+                                else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x? Press ENTER to continue"); Console.ReadLine(); }
+                            }
+                            catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x? Press ENTER to continue"); Console.ReadLine(); }
+
+                        }
                         break;
                 }
             }
@@ -198,6 +373,7 @@ namespace NPTUI
 
         public static void Load(string netplanPath)
         {
+            ethernets = new List<Ethernet>();
             Console.WriteLine($"Loading netplan config from {netplanPath}");
             string[] lines = File.ReadAllText(netplanPath).Split('\n');
             int indent_count = lines[Utils.GetLineNumber(lines, "version")].Split("version:")[0].Length;
@@ -280,10 +456,20 @@ namespace NPTUI
                     while (lines[i].Replace(" ", "") == "") i += 1;
                     while (lines[i].Replace(" ", "").Contains("-to:") && i < lines.Length)
                     {
-                        routes.Add(lines[i].Split("to:")[1] + "%" + lines[i+1].Split("via:")[1]);
+                        string route = lines[i].Split("to:")[1] + "%" + lines[i + 1].Split("via:")[1];
                         i += 2;
+                        if (lines[i].Contains("metric:"))
+                        {
+                            route += $"%{lines[i].Split("metric:")[1]}";
+                        }
+                        else { route += "%-1"; }
+                        routes.Add(route);
                         while (lines[i].Replace(" ", "") == "" && i < lines.Length) i += 1;
                     }
+                }
+                if (Utils.GetLineNumber(lines, "gateway4") > -1)
+                {
+                    routes.Add($"default%{lines[Utils.GetLineNumber(lines, "gateway4")].Split("way4:")[1].Replace(" ", "")}%-1");
                 }
             }
         }
@@ -311,7 +497,11 @@ namespace NPTUI
             {
                 output += @$"
 {tab}{tab}{tab}routes:";
-                foreach (string r in routes) output += $"\n{tab}{tab}{tab}{tab}- to: {r.Split("%")[0]}\n{tab}{tab}{tab}{tab}  via: {r.Split("%")[1]}";
+                foreach (string r in routes)
+                {
+                    output += $"\n{tab}{tab}{tab}{tab}- to: {r.Split("%")[0]}\n{tab}{tab}{tab}{tab}  via: {r.Split("%")[1]}";
+                    if (r.Split("%")[2] != "-1") output += $"\n{tab}{tab}{tab}{tab}  metric: {r.Split("%")[2]}";
+                }
             }
             return output;
         }
