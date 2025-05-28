@@ -6,7 +6,7 @@ NetPlan Terminal User Interface
 
 # Installation and Usage
 - Download latest `nptui` executable release.
-- Copy it into `/usr/bin/`
+- Copy it into `/usr/bin/` (optional)
 - `sudo nptui [optional: /path/to/netplan/file]`
 
 # Roadmap
