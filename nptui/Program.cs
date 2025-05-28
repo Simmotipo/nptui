@@ -647,7 +647,16 @@ namespace NPTUI
                 foreach (Ethernet e in ethernets) finished_product += e.ToYaml() + "\n";
             }
             if (previewOnly) Console.WriteLine(finished_product);
-            else File.WriteAllText(netplanPath, finished_product);
+            else {
+                try
+                {
+                    File.WriteAllText(netplanPath, finished_product);
+                }
+                catch
+                {
+                    Console.WriteLine("An error occurred trying to write to file. Try sudo?");
+                    Console.ReadLine();
+                }
         }
     }
 
