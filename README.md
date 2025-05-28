@@ -4,8 +4,10 @@ NetPlan Terminal User Interface
 # Requirements
 - dotnet8 (On ubuntu 24.04 LTS, simply `apt install dotnet8`)
 
-# Usage
-- sudo dotnet nptui.dll [optional: /path/to/netplan/file]
+# Installation and Usage
+- Download latest `nptui` executable release.
+- Copy it into `/usr/bin/`
+- `sudo nptui [optional: /path/to/netplan/file]`
 
 It is recommended you set up an executable file(t au mignon) at `/usr/bin/nptui` with the following, to allow use of nptui as a command:
 ```
