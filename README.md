@@ -12,8 +12,12 @@ NetPlan Terminal User Interface
 # Roadmap
 - Need to neaten up the code lol
 - Will host it in my own apt repo at some point
+- Better error handling!
 
 # Changelog
+# v1.3 | 28-05-25
+- Tell user to sudo if cannot read file.
+
 # v1.2 | 28-05-25
 - OK now you can also route so yeh
 

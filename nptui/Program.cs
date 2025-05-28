@@ -5,7 +5,7 @@ namespace NPTUI
 {
     class NPTUI
     {
-        public static string nptui_version = "v1.2";
+        public static string nptui_version = "v1.3";
         public static string nptui_date = "28-05-25";
         public static List<Ethernet> ethernets = new List<Ethernet>();
         public static string netplanPath = "";
@@ -68,18 +68,26 @@ namespace NPTUI
                                 Console.Clear();
                                 Console.Write("Enter path: ");
                                 netplanPath = Console.ReadLine();
-                                if (File.Exists(netplanPath))
+                                try
                                 {
-                                    if (netplanPath.StartsWith('/')) Load(netplanPath);
-                                    else { Console.WriteLine("NPTUI requires an absolute file path, not relative (your path must start with a /). Press ENTER to continue"); netplanPath = ""; Console.ReadLine(); }
-                                }
-                                else
-                                {
-                                    Console.WriteLine($"No such file {netplanPath}. Would you like to create one? [Y/n]");
-                                    if (Console.ReadKey().Key == ConsoleKey.Y)
+                                    if (File.Exists(netplanPath))
                                     {
-                                        File.WriteAllText(netplanPath, "network:\n  version: 2");
-                                    } else netplanPath = "";
+                                        if (netplanPath.StartsWith('/')) Load(netplanPath);
+                                        else { Console.WriteLine("NPTUI requires an absolute file path, not relative (your path must start with a /). Press ENTER to continue"); netplanPath = ""; Console.ReadLine(); }
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine($"No such file {netplanPath}. Would you like to create one? [Y/n]");
+                                        if (Console.ReadKey().Key == ConsoleKey.Y)
+                                        {
+                                            File.WriteAllText(netplanPath, "network:\n  version: 2");
+                                        }
+                                        else netplanPath = "";
+                                    }
+                                }
+                                catch
+                                {
+                                    Console.WriteLine("An error occurred trying to read that file. Try sudo?");
                                 }
                                 break;
                             case 2:
