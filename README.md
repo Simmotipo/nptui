@@ -14,8 +14,6 @@ NetPlan Terminal User Interface
 - Will host it in my own apt repo at some point
 - Better error handling!
 
-  https://github.com/Simmotipo/nptui/issues/12
-
 # Changelog
 # v1.4 | 29-05-25
 - Fix bugs with setting invalid/empty metrics on gateway creation/edit - [#1](https://github.com/Simmotipo/nptui/issues/1) and [#3](https://github.com/Simmotipo/nptui/issues/3)
