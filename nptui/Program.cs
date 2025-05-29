@@ -415,9 +415,17 @@ namespace NPTUI
                                             }
                                         }
                                     }
+                                    
                                     Console.Write($"Provide a gateway metric? Enter -1 for no metric [{current_metric}]");
-                                    string metric_resp = Console.ReadLine();
-                                    if (metric_resp == "") metric_resp = current_metric;
+                                    string metric_resp = Console.ReadLine().Replace(" ", "");
+                                    if (metric_resp == "") resp = current_metric;
+                                    if (metric_resp == "") resp = "-1";
+                                    try
+                                    {
+                                        if (Convert.ToInt32(resp) > -2) { route += $"{resp}"; }
+                                        else { Console.WriteLine("Invalid metric. Press ENTER to continue"); Console.ReadLine(); break; }
+                                    }
+                                    catch { Console.WriteLine("Invalid metric."); Console.ReadLine(); break; }
                                     if (menu_options[selected_item].Contains("Add"))
                                     {
                                         e.routes.Add($"default%{resp}%{metric_resp}");
