@@ -719,7 +719,7 @@ namespace NPTUI
                             i += 1;
                         }
                         else { route += "%-1"; }
-                        routes.Add(route);
+                        routes.Add(route.Replace(" ", ""));
                         while (lines[i].Replace(" ", "") == "" && i < lines.Length) i += 1;
                     }
                 }
