@@ -705,9 +705,10 @@ namespace NPTUI
                     {
                         string route = lines[i].Split("to:")[1] + "%" + lines[i + 1].Split("via:")[1];
                         i += 2;
-                        if (lines[i].Contains("metric:"))
+                        if (i < lines.Length && lines[i].Contains("metric:"))
                         {
                             route += $"%{lines[i].Split("metric:")[1]}";
+                            i += 1;
                         }
                         else { route += "%-1"; }
                         routes.Add(route);
