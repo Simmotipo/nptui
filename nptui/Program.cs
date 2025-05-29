@@ -5,7 +5,7 @@ namespace NPTUI
 {
     class NPTUI
     {
-        public static string nptui_version = "v1.3";
+        public static string nptui_version = "v1.4";
         public static string nptui_date = "28-05-25";
         public static List<Ethernet> ethernets = new List<Ethernet>();
         public static string netplanPath = "";
@@ -725,7 +725,7 @@ namespace NPTUI
         {
             string tab = "";
             for (int i = 0; i < indent; i++) tab += " ";
-            string output = @$"{tab}{tab}{name}
+            string output = @$"{tab}{tab}{name}:
 {tab}{tab}{tab}dhcp4: {dhcp4}";
             if (addresses.Count() > 0 && dhcp4 == "no") {
                 output += $"\n{tab}{tab}{tab}addresses: ";
