@@ -16,9 +16,10 @@ NetPlan Terminal User Interface
 
 # Changelog
 # v1.4 | 29-05-25
-- Fix bugs with setting invalid/empty metrics on gateway creation/edit
-- Fix bug where colon after interface name was not added into yaml
-- Fix IndexOutOfRangeException when loading routes at end of file which have no metric
+- Fix bugs with setting invalid/empty metrics on gateway creation/edit - #1 and #3
+- Fix bug where colon after interface name was not added into yaml - #10
+- Fix IndexOutOfRangeException when loading routes at end of file which have no metric - #11
+- Strip spaces inadvertently loaded in as a part of the route loading (which could lead to default route / gateway not being detected) - #12
 
 # v1.3 | 28-05-25
 - Tell user to sudo if cannot read/write file.
