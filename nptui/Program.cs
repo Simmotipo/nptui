@@ -6,7 +6,7 @@ namespace NPTUI
     class NPTUI
     {
         public static string nptui_version = "v1.4";
-        public static string nptui_date = "28-05-25";
+        public static string nptui_date = "29-05-25";
         public static List<Ethernet> ethernets = new List<Ethernet>();
         public static string netplanPath = "";
         public static void Main(string[] args)
@@ -418,12 +418,11 @@ namespace NPTUI
                                     
                                     Console.Write($"Provide a gateway metric? Enter -1 for no metric [{current_metric}]");
                                     string metric_resp = Console.ReadLine().Replace(" ", "");
-                                    if (metric_resp == "") resp = current_metric;
-                                    if (metric_resp == "") resp = "-1";
+                                    if (metric_resp == "") metric_resp = current_metric;
+                                    if (metric_resp == "") metric_resp = "-1";
                                     try
                                     {
-                                        if (Convert.ToInt32(resp) > -2) { route += $"{resp}"; }
-                                        else { Console.WriteLine("Invalid metric. Press ENTER to continue"); Console.ReadLine(); break; }
+                                        if (Convert.ToInt32(metric_resp) < -2) { Console.WriteLine("Invalid metric. Press ENTER to continue"); Console.ReadLine(); break; }
                                     }
                                     catch { Console.WriteLine("Invalid metric."); Console.ReadLine(); break; }
                                     if (menu_options[selected_item].Contains("Add"))
@@ -664,6 +663,12 @@ namespace NPTUI
                 catch
                 {
                     Console.WriteLine("An error occurred trying to write to file. Try sudo?");
+                    try
+                    {
+                        File.WriteAllText("/tmp/nptui.bak", finished_product);
+                        Console.WriteLine("Dumped file to /tmp/nptui.bak");
+                    }
+                    catch { }
                     Console.ReadLine();
                 }
             }
@@ -693,7 +698,7 @@ namespace NPTUI
                 if (Utils.GetLineNumber(lines, "addresses") > -1)
                 {
                     int i = Utils.GetLineNumber(lines, "addresses") + 1;
-                    while (lines[i].Replace(" ", "").StartsWith("-"))
+                    while (i < lines.Length && lines[i].Replace(" ", "").StartsWith("-"))
                     {
                         addresses.Add(lines[i].Split(" ")[lines[i].Split(" ").Length - 1]);
                         i += 1;
@@ -709,7 +714,7 @@ namespace NPTUI
                 {
                     int i = Utils.GetLineNumber(lines, "routes") + 1;
                     while (lines[i].Replace(" ", "") == "") i += 1;
-                    while (lines[i].Replace(" ", "").Contains("-to:") && i < lines.Length)
+                    while (i < lines.Length && lines[i].Replace(" ", "").Contains("-to:"))
                     {
                         string route = lines[i].Split("to:")[1] + "%" + lines[i + 1].Split("via:")[1];
                         i += 2;
@@ -720,7 +725,7 @@ namespace NPTUI
                         }
                         else { route += "%-1"; }
                         routes.Add(route.Replace(" ", ""));
-                        while (lines[i].Replace(" ", "") == "" && i < lines.Length) i += 1;
+                        while (i < lines.Length && lines[i].Replace(" ", "") == "") i += 1;
                     }
                 }
                 if (Utils.GetLineNumber(lines, "gateway4") > -1)

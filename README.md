@@ -22,6 +22,7 @@ NetPlan Terminal User Interface
 - Fix bug where colon after interface name was not added into yaml - [#10](https://github.com/Simmotipo/nptui/issues/10)
 - Fix IndexOutOfRangeException when loading routes at end of file which have no metric - [#11](https://github.com/Simmotipo/nptui/issues/11)
 - Strip spaces inadvertently loaded in as a part of the route loading (which could lead to default route / gateway not being detected) - [#12](https://github.com/Simmotipo/nptui/issues/12)
+- If we fail to save, dump file to /tmp/nptui.bak just in case
 
 # v1.3 | 28-05-25
 - Tell user to sudo if cannot read/write file.
