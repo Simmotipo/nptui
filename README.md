@@ -18,7 +18,6 @@ sudo apt install nptui
 
 # Roadmap
 - Need to neaten up the code lol
-- Will host it in my own apt repo at some point
 - Better error handling!
 
 # Changelog
