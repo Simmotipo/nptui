@@ -1,9 +1,6 @@
 # nptui
 NetPlan Terminal User Interface
 
-# Requirements
-- dotnet8 (On ubuntu 24.04 LTS, simply `apt install dotnet8`)
-
 # Installation and Usage
 ## Method 1: Via apt:
 1. `sudo mkdir -p /etc/apt/keyrings`
