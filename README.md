@@ -5,8 +5,16 @@ NetPlan Terminal User Interface
 - dotnet8 (On ubuntu 24.04 LTS, simply `apt install dotnet8`)
 
 # Installation and Usage
-- Download latest `nptui` executable release.
+## Method 1: Via apt:
+1. `sudo mkdir -p /etc/apt/keyrings`
+2. `wget -O- http://repo.rakico.xyz/ubuntu/repo-rakico-xyz.gpg | gpg --dearmor | sudo tee /etc/apt/keyrings/repo-rakico-xyz.gpg > /dev/null ; sudo chmod 644 /etc/apt/keyrings/repo-rakico-xyz.gpg`
+3. `echo "deb [signed-by=/etc/apt/keyrings/repo-rakico-xyz.gpg] http://repo.rakico.xyz/ubuntu stable main" | sudo tee /etc/apt/sources.list.d/rakico.list`
+4. `sudo apt install nptui`
+
+## Method 2: Manually
+- Download latest `nptui` executable release and transfer to device.
 - Copy it into `/usr/bin/` (optional)
+- `chmod +x nptui` / `chmod +x /usr/bin/nptui`
 - `sudo nptui [optional: /path/to/netplan/file]`
 
 # Roadmap
