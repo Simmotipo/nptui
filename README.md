@@ -9,6 +9,7 @@ sudo mkdir -p /etc/apt/keyrings
 wget -O- http://repo.rakico.xyz/ubuntu/repo-rakico-xyz.gpg | gpg --dearmor | sudo tee /etc/apt/keyrings/repo-rakico-xyz.gpg > /dev/null ; sudo chmod 644 /etc/apt/keyrings/repo-rakico-xyz.gpg
 echo "deb [signed-by=/etc/apt/keyrings/repo-rakico-xyz.gpg] http://repo.rakico.xyz/ubuntu stable main" | sudo tee /etc/apt/sources.list.d/rakico.list
 sudo apt install nptui
+sudo nptui [optional: /path/to/netplan/file]
 ```
 
 ## Method 2: Manually
