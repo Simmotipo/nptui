@@ -26,9 +26,11 @@ sudo nptui [optional: /path/to/netplan/file]
 # Changelog
 ## v1.5 | 03-06-25
 - When fail to load a netplan file, netplanPath is now blanked.
-- When adding an interface, there is now a list of available ones to choose from
-- When creating or saving netplan files, the permissions 644 are now set
-- Added missing space after the [] sections on route editing prompts
+- When adding an interface, there is now a list of available ones to choose from [#2](https://github.com/Simmotipo/nptui/issues/2)
+- When creating or saving netplan files, the permissions 644 are now set [#8](https://github.com/Simmotipo/nptui/issues/8)
+- Added missing space after the [] sections on route editing prompts [#14](https://github.com/Simmotipo/nptui/issues/14)
+- Fixed issue reading blank nameservers list [#13](https://github.com/Simmotipo/nptui/issues/13)
+- If no file path provided on load, default to `/etc/netplan/25-nptui.yaml` [#15](https://github.com/Simmotipo/nptui/issues/15)
 
 # v1.4 | 29-05-25
 - Fix bugs with setting invalid/empty metrics on gateway creation/edit - [#1](https://github.com/Simmotipo/nptui/issues/1) and [#3](https://github.com/Simmotipo/nptui/issues/3)
