@@ -1,12 +1,15 @@
 ﻿using System;
 using System.IO;
+using System.Net.NetworkInformation;
+using System.Linq;
+using System.ComponentModel;
 
 namespace NPTUI
 {
     class NPTUI
     {
-        public static string nptui_version = "v1.4";
-        public static string nptui_date = "29-05-25";
+        public static string nptui_version = "v1.5";
+        public static string nptui_date = "03-06-25";
         public static List<Ethernet> ethernets = new List<Ethernet>();
         public static string netplanPath = "";
         public static void Main(string[] args)
@@ -14,7 +17,39 @@ namespace NPTUI
             Console.Clear();
             netplanPath = "";
             if (args.Length > 0) netplanPath = args[0];
-            if (netplanPath != "" && netplanPath.StartsWith('/')) Load(netplanPath);
+            else netplanPath = "/etc/netplan/25-nptui.yaml";
+            if (netplanPath != "")
+            {
+                if (File.Exists(netplanPath))
+                {
+                    if (netplanPath.StartsWith('/')) Load(netplanPath);
+                    else { Console.WriteLine("NPTUI requires an absolute file path, not relative (your path must start with a /). Press ENTER to continue"); netplanPath = ""; Console.ReadLine(); }
+                }
+                else
+                {
+                    Console.WriteLine($"No such file {netplanPath}. Would you like to create one? [Y/n]");
+                    if (netplanPath == "/etc/netplan/25-nptui.yaml" || Console.ReadKey().Key == ConsoleKey.Y)
+                    {
+                        try
+                        {
+                            File.WriteAllText(netplanPath, "network:\n  version: 2");
+                            UnixFileMode permissions = UnixFileMode.UserRead | UnixFileMode.UserWrite |
+                            UnixFileMode.GroupRead |
+                            UnixFileMode.OtherRead;
+
+                            File.SetUnixFileMode(netplanPath, permissions);
+                            Load(netplanPath);
+                        }
+                        catch
+                        {
+                            Console.WriteLine("An error occurred creating the file. Try sudo?");
+                            Console.WriteLine("Press ENTER to continue");
+                            Console.ReadLine();
+                        }
+                    }
+                    else netplanPath = "";
+                }
+            }
             else netplanPath = "";
 
 
@@ -25,7 +60,7 @@ namespace NPTUI
         public static void MainMenu()
         {
             int selected_item = 0;
-            string[] menu_options = ["List Interfaces", "Load Netplan File", "About NPTUI", "Preview and Save", "Exit"];
+            string[] menu_options = ["Edit Interfaces", "Load Netplan File", "About NPTUI", "Preview and Save", "Exit"];
             while (true)
             {
                 Console.BackgroundColor = ConsoleColor.Black;
@@ -80,7 +115,22 @@ namespace NPTUI
                                         Console.WriteLine($"No such file {netplanPath}. Would you like to create one? [Y/n]");
                                         if (Console.ReadKey().Key == ConsoleKey.Y)
                                         {
-                                            File.WriteAllText(netplanPath, "network:\n  version: 2");
+                                            try
+                                            {
+                                                File.WriteAllText(netplanPath, "network:\n  version: 2");
+                                                UnixFileMode permissions = UnixFileMode.UserRead | UnixFileMode.UserWrite |
+                                                UnixFileMode.GroupRead |
+                                                UnixFileMode.OtherRead;
+
+                                                File.SetUnixFileMode(netplanPath, permissions);
+                                                Load(netplanPath);
+                                            }
+                                            catch
+                                            {
+                                                Console.WriteLine("An error occurred creating the file. Try sudo?");
+                                                Console.WriteLine("Press ENTER to continue");
+                                                Console.ReadLine();
+                                            }
                                         }
                                         else netplanPath = "";
                                     }
@@ -182,18 +232,85 @@ namespace NPTUI
                         if (selected_item == menu_options.Length - 1) return;
                         else if (menu_options[selected_item].Contains("Add Interface"))
                         {
-                            Console.Clear();
-                            Console.Write($"Enter interface name: ");
-                            string new_name = Console.ReadLine().Replace(" ", "");
-                            if (!menu_options.Contains(new_name))
-                            {
-                                ethernets.Add(new Ethernet($"    {new_name}\n      dhcp4: true"));
-                                refreshMenuOptions = true;
-                            }
+                            AddInterfaceMenu();
+                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item] != "")
                         {
                             foreach (Ethernet e in ethernets) if (e.name == menu_options[selected_item]) { EditInterface(e); break; }
+                            refreshMenuOptions = true;
+                        }
+                        break;
+                }
+            }
+        }
+
+        public static void AddInterfaceMenu()
+        {
+            int selected_item = 0;
+            bool refreshMenuOptions = true;
+            string[] menu_options = [];
+            while (true)
+            {
+                if (refreshMenuOptions)
+                {
+                    List<string> menuOptionsList = new List<string>();
+                    foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
+                    {
+                        bool can_add = true;
+                        foreach (Ethernet ethernet in ethernets) if (ethernet.name == ni.Name) { can_add = false; break; } // I know this is inefficient; I'll come back to this.
+                        if (can_add) menuOptionsList.Add(ni.Name);
+                    }
+                    menuOptionsList.Add("");
+                    menuOptionsList.Add("+ Custom / Other Interface");
+                    menuOptionsList.Add("< Back To Menu");
+                    menu_options = menuOptionsList.ToArray();
+                    refreshMenuOptions = false;
+                }
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Clear();
+                Console.WriteLine("\n");
+                Console.WriteLine($"    NPTUI [{nptui_version}] (netplanPath: {netplanPath})");
+                Console.WriteLine($"");
+                for (int i = 0; i < menu_options.Length; i++)
+                {
+                    if (i == selected_item)
+                    {
+                        Console.BackgroundColor = ConsoleColor.White;
+                        Console.ForegroundColor = ConsoleColor.Black;
+                    }
+                    else
+                    {
+                        Console.BackgroundColor = ConsoleColor.Black;
+                        Console.ForegroundColor = ConsoleColor.White;
+                    }
+                    Console.WriteLine($"    {i + 1}. {menu_options[i].PadRight(32)}");
+                }
+                switch (Console.ReadKey().Key)
+                {
+                    case ConsoleKey.UpArrow:
+                        selected_item -= 1;
+                        if (selected_item < 0) selected_item = menu_options.Length - 1;
+                        break;
+                    case ConsoleKey.DownArrow:
+                        selected_item += 1;
+                        if (selected_item >= menu_options.Length) selected_item = 0;
+                        break;
+                    case ConsoleKey.Enter:
+                    case ConsoleKey.Spacebar:
+                        if (selected_item == menu_options.Length - 1) return;
+                        else if (menu_options[selected_item].Contains("Custom / Other Interface"))
+                        {
+                            Console.Clear();
+                            Console.Write($"Enter interface name: ");
+                            string new_name = Console.ReadLine().Replace(" ", "");
+                            ethernets.Add(new Ethernet($"    {new_name}\n      dhcp4: true"));
+                            refreshMenuOptions = true;
+                        }
+                        else if (menu_options[selected_item] != "")
+                        {
+                            ethernets.Add(new Ethernet($"    {menu_options[selected_item]}\n      dhcp4: true"));
                             refreshMenuOptions = true;
                         }
                         break;
@@ -520,7 +637,7 @@ namespace NPTUI
                         if (selected_item == menu_options.Length - 1) return;
                         else if (menu_options[selected_item].Contains("Add Route"))
                         {
-                            Console.Write("Enter Destination [x.x.x.x/xx]");
+                            Console.Write("Enter Destination [x.x.x.x/xx] ");
                             string resp = Console.ReadLine();
                             string route = "";
                             try
@@ -530,7 +647,7 @@ namespace NPTUI
                             }
                             catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); break; }
 
-                            Console.Write("Enter Next Hop [x.x.x.x]");
+                            Console.Write("Enter Next Hop [x.x.x.x] ");
                             resp = Console.ReadLine();
                             try
                             {
@@ -539,7 +656,7 @@ namespace NPTUI
                             }
                             catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x? Press ENTER to continue"); Console.ReadLine(); break; }
 
-                            Console.Write("Provide a Metric? Leave blank or -1 for no metric []");
+                            Console.Write("Provide a Metric? Leave blank or -1 for no metric [] ");
                             resp = Console.ReadLine().Replace(" ", "");
                             if (resp == "") resp = "-1";
                             try
@@ -613,9 +730,10 @@ namespace NPTUI
             {
                 lines = File.ReadAllText(netplanPath).Split('\n');
             }
-            catch
+            catch (Exception e)
             {
-                Console.WriteLine("An error occurred trying to read that file. Try sudo?");
+                Console.WriteLine($"An error occurred trying to read that file. Try sudo?");
+                netplanPath = "";
                 Console.ReadLine();
                 return;
             }
@@ -659,6 +777,11 @@ namespace NPTUI
                 try
                 {
                     File.WriteAllText(netplanPath, finished_product);
+                    UnixFileMode permissions = UnixFileMode.UserRead | UnixFileMode.UserWrite | 
+                    UnixFileMode.GroupRead | 
+                    UnixFileMode.OtherRead;
+
+                    File.SetUnixFileMode(netplanPath, permissions);
                 }
                 catch
                 {
@@ -708,7 +831,8 @@ namespace NPTUI
                 {
                     int i = Utils.GetLineNumber(lines, "nameservers") + 1;
                     while (!lines[i].Split(':')[0].EndsWith("addresses")) i += 1;
-                    nameservers = new List<string>(lines[i].Split(':')[1].Split('#')[0].Replace("[", "").Replace("]", "").Replace(" ", "").Split(","));
+                    List<string> nameservers_temp = new List<string>(lines[i].Split(':')[1].Split('#')[0].Replace("[", "").Replace("]", "").Replace(" ", "").Split(","));
+                    foreach (string nameserver in nameservers_temp) if (!nameservers.Contains(nameserver) && nameserver.Replace(" ", "") != "") nameservers.Add(nameserver);
                 }
                 if (Utils.GetLineNumber(lines, "routes") > -1)
                 {

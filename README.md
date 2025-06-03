@@ -1,6 +1,7 @@
 # nptui
 NetPlan Terminal User Interface - a primitive TUI for managing netplan configs.
 - See the Issues page before information and bug reporting / feature requesting
+- If cloning this repo, please run a dotnet build prior to running anything from the bin/Debug/net8.0/linux_x64/nptui.dll paths, etc., as there is no guarantee the built DLL (or the published binary, for that matter) will be latest.
 
 # Installation and Usage
 ## Method 1: Via apt:
@@ -23,6 +24,12 @@ sudo nptui [optional: /path/to/netplan/file]
 - Better error handling!
 
 # Changelog
+## v1.5 | 03-06-25
+- When fail to load a netplan file, netplanPath is now blanked.
+- When adding an interface, there is now a list of available ones to choose from
+- When creating or saving netplan files, the permissions 644 are now set
+- Added missing space after the [] sections on route editing prompts
+
 # v1.4 | 29-05-25
 - Fix bugs with setting invalid/empty metrics on gateway creation/edit - [#1](https://github.com/Simmotipo/nptui/issues/1) and [#3](https://github.com/Simmotipo/nptui/issues/3)
 - Fix bug where colon after interface name was not added into yaml - [#10](https://github.com/Simmotipo/nptui/issues/10)
