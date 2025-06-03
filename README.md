@@ -1,5 +1,6 @@
 # nptui
-NetPlan Terminal User Interface
+NetPlan Terminal User Interface - a primitive TUI for managing netplan configs.
+- See the Issues page before information and bug reporting / feature requesting
 
 # Installation and Usage
 ## Method 1: Via apt:
