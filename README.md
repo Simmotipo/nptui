@@ -9,8 +9,8 @@ NetPlan Terminal User Interface - a primitive TUI for managing netplan configs.
 sudo mkdir -p /etc/apt/keyrings
 wget -O- http://repo.rakico.xyz/ubuntu/repo-rakico-xyz.gpg | gpg --dearmor | sudo tee /etc/apt/keyrings/repo-rakico-xyz.gpg > /dev/null ; sudo chmod 644 /etc/apt/keyrings/repo-rakico-xyz.gpg
 echo "deb [signed-by=/etc/apt/keyrings/repo-rakico-xyz.gpg] http://repo.rakico.xyz/ubuntu stable main" | sudo tee /etc/apt/sources.list.d/rakico.list
-sudo apt install nptui
-sudo apt update ; sudo nptui [optional: /path/to/netplan/file]
+sudo apt update ; sudo apt install nptui
+sudo nptui [optional: /path/to/netplan/file]
 ```
 
 ## Method 2: Manually
@@ -24,6 +24,10 @@ sudo apt update ; sudo nptui [optional: /path/to/netplan/file]
 - Better error handling!
 
 # Changelog
+## v1.7 | 04-06-25
+- Fix file permissions in other places too- finally truly fix [#8](https://github.com/Simmotipo/nptui/issues/8)
+- Re-order interface config page to put Addresses above Gateway (when dhcp disabled)
+
 ## v1.6 | 04-06-25
 - Change default 25-nptui.yaml permissions to 600 to re-fix [#8](https://github.com/Simmotipo/nptui/issues/8)
 - Fix issue where nameservers were only saved if DHCP was set to yes. [#16](https://github.com/Simmotipo/nptui/issues/16)

@@ -8,7 +8,7 @@ namespace NPTUI
 {
     class NPTUI
     {
-        public static string nptui_version = "v1.6";
+        public static string nptui_version = "v1.7";
         public static string nptui_date = "04-06-25";
         public static List<Ethernet> ethernets = new List<Ethernet>();
         public static string netplanPath = "";
@@ -121,9 +121,7 @@ namespace NPTUI
                                             try
                                             {
                                                 File.WriteAllText(netplanPath, "network:\n  version: 2");
-                                                UnixFileMode permissions = UnixFileMode.UserRead | UnixFileMode.UserWrite |
-                                                UnixFileMode.GroupRead |
-                                                UnixFileMode.OtherRead;
+                                                UnixFileMode permissions = UnixFileMode.UserRead | UnixFileMode.UserWrite;
 
                                                 File.SetUnixFileMode(netplanPath, permissions);
                                                 Load(netplanPath);
@@ -339,6 +337,8 @@ namespace NPTUI
                     menuOptionsList.Add($"DHCP                  | {e.dhcp4}".PadRight(64));
                     if (e.dhcp4 == "no")
                     {
+                        for (int i = 0; i < e.addresses.Count(); i++) menuOptionsList.Add($"Address {i + 1}             | {e.addresses[i]}".PadRight(64));
+                        menuOptionsList.Add($"+ Add Address         ".PadRight(64));
                         bool found_gateway = false;
                         foreach (string route in e.routes)
                         {
@@ -354,8 +354,6 @@ namespace NPTUI
                         {
                             menuOptionsList.Add($"+ Add Gateway".PadRight(64));
                         }
-                        for (int i = 0; i < e.addresses.Count(); i++) menuOptionsList.Add($"Address {i + 1}             | {e.addresses[i]}".PadRight(64));
-                        menuOptionsList.Add($"+ Add Address         ".PadRight(64));
                     }
                     int route_count = 0;
                     foreach (string route in e.routes) if (!route.Contains("default")) route_count += 1;
@@ -789,9 +787,7 @@ namespace NPTUI
                 try
                 {
                     File.WriteAllText(netplanPath, finished_product);
-                    UnixFileMode permissions = UnixFileMode.UserRead | UnixFileMode.UserWrite | 
-                    UnixFileMode.GroupRead | 
-                    UnixFileMode.OtherRead;
+                    UnixFileMode permissions = UnixFileMode.UserRead | UnixFileMode.UserWrite;
 
                     File.SetUnixFileMode(netplanPath, permissions);
                 }
