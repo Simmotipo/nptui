@@ -28,6 +28,8 @@ sudo apt update ; sudo nptui [optional: /path/to/netplan/file]
 - Change default 25-nptui.yaml permissions to 600 to re-fix [#8](https://github.com/Simmotipo/nptui/issues/8)
 - Fix issue where nameservers were only saved if DHCP was set to yes. [#16](https://github.com/Simmotipo/nptui/issues/16)
 - Add checks to prevent editing interfaces if netplanPath is blank. [#5](https://github.com/Simmotipo/nptui/issues/5)
+- Fixed bug where you could accidentally and irreversably add an interface with no name.
+- Fix Utils.GetIndentationLevel and Loading bug [#17](https://github.com/Simmotipo/nptui/issues/17)
 
 ## v1.5 | 03-06-25
 - When fail to load a netplan file, netplanPath is now blanked.

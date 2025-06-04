@@ -308,7 +308,10 @@ namespace NPTUI
                             Console.Clear();
                             Console.Write($"Enter interface name: ");
                             string new_name = Console.ReadLine().Replace(" ", "");
-                            ethernets.Add(new Ethernet($"    {new_name}\n      dhcp4: true"));
+                            
+                            bool can_add = true;
+                            foreach (Ethernet ethernet in ethernets) if (ethernet.name == new_name) { can_add = false; break; } // I know this is inefficient; I'll come back to this.
+                            if (can_add && new_name.Replace(" ", "") != "") ethernets.Add(new Ethernet($"    {new_name}\n      dhcp4: true"));
                             refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item] != "")
@@ -746,6 +749,7 @@ namespace NPTUI
             if (Utils.GetLineNumber(lines, "ethernets") > -1)
             {
                 string workingLines = "";
+                bool first_pass = true;
                 for (int i = Utils.GetLineNumber(lines, "ethernets") + 1; i < lines.Length; i++)
                 {
                     // Check these two conditions. If both eval to true, then we have a non-blank line that is
@@ -753,8 +757,13 @@ namespace NPTUI
                     if (lines[i] != "" && Utils.GetIndentationLevel(lines[i], indent_count) < 2) break;
                     else if (lines[i] != "" && Utils.GetIndentationLevel(lines[i], indent_count) == 2)
                     {
-                        ethernets.Add(new Ethernet(workingLines));
-                        workingLines = "";
+                        if (first_pass) { workingLines += lines[i] + "\n"; first_pass = false; }
+                        else
+                        {
+                            ethernets.Add(new Ethernet(workingLines));
+                            workingLines = "";
+                            workingLines += lines[i] + "\n";
+                        }
                     }
                     else workingLines += lines[i] + "\n";
                 }
@@ -812,7 +821,7 @@ namespace NPTUI
 
         public Ethernet(string data, int indent = 2)
         {
-            // Console.WriteLine($"I'm working with: {data}");
+            Console.WriteLine($"I'm working with: {data}");
             string[] lines = data.Split("\n");
             name = lines[0].Split(':')[0].Replace(" ", "");
             if (data.ToLower().Contains("dhcp4: true") || data.ToLower().Contains("dhcp4: yes")) dhcp4 = "yes";
@@ -910,10 +919,12 @@ namespace NPTUI
 
         public static int GetIndentationLevel(string line, int indent = 2)
         {
-            for (int i = 0; i < line.Length; i++)
+            int level = 0;
+            int i = 0;
+            while (i < line.Length)
             {
-                if (line[i] != ' ') return i;
-                else i += indent;
+                if (line[i] != ' ') return level;
+                else { i += indent; level++; }
             }
             return -1;
         }
