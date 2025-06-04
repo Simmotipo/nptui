@@ -8,8 +8,8 @@ namespace NPTUI
 {
     class NPTUI
     {
-        public static string nptui_version = "v1.5";
-        public static string nptui_date = "03-06-25";
+        public static string nptui_version = "v1.6";
+        public static string nptui_date = "04-06-25";
         public static List<Ethernet> ethernets = new List<Ethernet>();
         public static string netplanPath = "";
         public static void Main(string[] args)
@@ -33,9 +33,7 @@ namespace NPTUI
                         try
                         {
                             File.WriteAllText(netplanPath, "network:\n  version: 2");
-                            UnixFileMode permissions = UnixFileMode.UserRead | UnixFileMode.UserWrite |
-                            UnixFileMode.GroupRead |
-                            UnixFileMode.OtherRead;
+                            UnixFileMode permissions = UnixFileMode.UserRead | UnixFileMode.UserWrite;
 
                             File.SetUnixFileMode(netplanPath, permissions);
                             Load(netplanPath);
@@ -97,7 +95,12 @@ namespace NPTUI
                         switch (selected_item)
                         {
                             case 0:
-                                InterfacesMenu();
+                                if (netplanPath.Replace(" ", "").Replace("/", "") == "")
+                                {
+                                    Console.WriteLine("Cannot work on config without first loading a file path.\nTo create a new file for it, choose 'Load File' and enter a new absolute file path: you will then be prompted to created it.\nPress ENTER to continue.");
+                                    Console.ReadLine();
+                                }
+                                else InterfacesMenu();
                                 break;
                             case 1:
                                 Console.Clear();
@@ -869,7 +872,7 @@ namespace NPTUI
                 output += $"\n{tab}{tab}{tab}addresses: ";
                 foreach (string s in addresses) output += $"\n{tab}{tab}{tab}{tab}- {s}";
             }
-            if (dhcp4 == "no")
+            if (nameservers.Count > 0)
             {
                 output += @$"
 {tab}{tab}{tab}nameservers:
