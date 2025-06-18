@@ -19,11 +19,15 @@ sudo nptui [optional: /path/to/netplan/file]
 - `chmod +x nptui` / `chmod +x /usr/bin/nptui`
 - `sudo nptui [optional: /path/to/netplan/file]`
 
-# Roadmap
-- Need to neaten up the code lol
-- Better error handling!
-
 # Changelog
+## v4.0 | 18-06-25
+- Added support for VLAN subinterfaces
+- Stopped saving config for 'lo' (this should be ignored)
+- Fixed bug where netplan was not saved immediately after deleting a bond (you had to go make another change first)
+- Added more logic of when to clear console, and reordered colour settings so that the background colour (black) is always set before the relevant console clear commands (no more flashbangs :> )
+- Ensure all EditInterface, EditVlan and EditBond menu items have PadRight(64) in them, to make the background highlighting (a little) more even
+- Added spaces where they were missing after the closing bracket of the default / current option when prompting user for text input.
+
 ## v3.0 | 18-06-25
 - Fixed issue where nameservers and routes were not loaded on dhcp interfaces
 - Added support for loading, editing and saving interface bonds.
