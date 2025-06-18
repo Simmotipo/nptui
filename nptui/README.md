@@ -27,6 +27,12 @@ sudo nptui [optional: /path/to/netplan/file]
 - Names of grayed out interfaces in the interface list are invisible / same as background colour. You have to hover over them to see them. (Looks like ConsoleColor.Black and ConsoleColor.DarkGray end up the same colour, same for ConsoleColor.Gray and ConsoleColor.White... I'll figure this out soon, promise)
 
 # Changelog
+## v2.4 | 18-06-25
+- Added cyclical backups, to automatically keep/maintain 5 rolling backups (Taken and rotated when the 'nptui' command is ran and the program starts.)
+
+## v2.3 | 18-06-25
+- Updated disabled interfaces to be dark red (rather than the non-existent dark gray) to ensure they're always visible!
+
 ## v2.2 | 18-06-25
 - Fixed issue saving netplan file with trying to save activation-mode: on (rather than omitting the activation-mode line)
 

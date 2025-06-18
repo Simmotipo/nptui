@@ -10,7 +10,7 @@ namespace NPTUI
 {
     class NPTUI
     {
-        public static string nptui_version = "v2.2";
+        public static string nptui_version = "v2.4";
         public static string nptui_date = "18-06-25";
         public static List<Ethernet> ethernets = new List<Ethernet>();
         public static string netplanPath = "";
@@ -22,6 +22,7 @@ namespace NPTUI
             else netplanPath = "/etc/netplan/25-nptui.yaml";
             if (netplanPath != "")
             {
+                if (!Utils.CycleBackups(netplanPath)) { Console.WriteLine("Could not create backup configs, quitting. Try sudo next time"); Environment.Exit(0); }
                 if (File.Exists(netplanPath))
                 {
                     try
@@ -48,6 +49,7 @@ namespace NPTUI
                     Console.WriteLine($"No such file {netplanPath}. Would you like to create one? [Y/n]");
                     if (netplanPath == "/etc/netplan/25-nptui.yaml" || Console.ReadKey().Key == ConsoleKey.Y)
                     {
+                        if (!Utils.CycleBackups(netplanPath)) { Console.WriteLine("Could not create backup configs, quitting. Try sudo next time"); Environment.Exit(0); }
                         try
                         {
                             File.WriteAllText(netplanPath, "network:\n  version: 2");
@@ -231,7 +233,7 @@ namespace NPTUI
                     {
                         if (ethernet.name == menu_options[i])
                         {
-                            if (ethernet.activationmode == "off") { Console.ForegroundColor = ConsoleColor.DarkGray; }
+                            if (ethernet.activationmode == "off") { Console.ForegroundColor = ConsoleColor.DarkRed; }
                             break;
                         }
                     }
@@ -918,7 +920,8 @@ namespace NPTUI
             "Imagine showing netplan to a caveman.",
             "I could have learnt netplan and yaml. Instead I wrote 1000 lines of C#.",
             "If someone could explain why I have to log into KDE plasma twice (the first hangs for 60 seconds then fails) on my Ubuntu 24.04 PC, that'd be great. Thanks.",
-            "[insert imaginative and funny phrase here.]"
+            "[insert imaginative and funny phrase here.]",
+            "Configure? I hardly know 'er."
         ];
         private static readonly Random random = new Random();
         public static string GetRandomSplash()
@@ -929,6 +932,27 @@ namespace NPTUI
 
             // Return the item at the random index
             return AboutSplashes[index];
+        }
+
+        public static bool CycleBackups(string path)
+        {
+            try
+            {
+                string pathKey = path.Split('/')[path.Split('/').Length - 1];
+                for (int i = 4; i >= 0; i--)
+                {
+                    if (File.Exists($"/etc/netplan/{pathKey}.bak-{i}"))
+                    {
+                        File.Move($"/etc/netplan/{pathKey}.bak-{i}", $"/etc/netplan/{pathKey}.bak-{i + 1}");
+                    }
+                }
+                if (File.Exists($"/etc/netplan/{pathKey}"))
+                {
+                    File.Copy($"/etc/netplan/{pathKey}", $"/etc/netplan/{pathKey}.bak-{0}");
+                }
+                return true;
+            }
+            catch { return false; }
         }
     }
 }
