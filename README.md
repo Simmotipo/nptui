@@ -23,9 +23,6 @@ sudo nptui [optional: /path/to/netplan/file]
 - Need to neaten up the code lol
 - Better error handling!
 
-# Known Issues
-- Names of grayed out interfaces in the interface list are invisible / same as background colour. You have to hover over them to see them. (Looks like ConsoleColor.Black and ConsoleColor.DarkGray end up the same colour, same for ConsoleColor.Gray and ConsoleColor.White... I'll figure this out soon, promise)
-
 # Changelog
 ## v3.0 | 18-06-25
 - Fixed issue where nameservers and routes were not loaded on dhcp interfaces
