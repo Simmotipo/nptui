@@ -23,7 +23,30 @@ sudo nptui [optional: /path/to/netplan/file]
 - Need to neaten up the code lol
 - Better error handling!
 
+# Known Issues
+- Names of grayed out interfaces in the interface list are invisible / same as background colour. You have to hover over them to see them. (Looks like ConsoleColor.Black and ConsoleColor.DarkGray end up the same colour, same for ConsoleColor.Gray and ConsoleColor.White... I'll figure this out soon, promise)
+
 # Changelog
+## v2.4 | 18-06-25
+- Added cyclical backups, to automatically keep/maintain 5 rolling backups (Taken and rotated when the 'nptui' command is ran and the program starts.)
+
+## v2.3 | 18-06-25
+- Updated disabled interfaces to be dark red (rather than the non-existent dark gray) to ensure they're always visible!
+
+## v2.2 | 18-06-25
+- Fixed issue saving netplan file with trying to save activation-mode: on (rather than omitting the activation-mode line)
+
+## v2.1 | 18-06-25
+- Add logic for default activationmode when loading an older netplan config that does not specify it (rather than just defaulting to off)
+
+## v2.0 | 18-06-25
+- v2.0 is here!
+- Added support for activation-mode, including default value setting, and greying out disabled interfaces ([#19](https://github.com/Simmotipo/nptui/issues/19), [#21](https://github.com/Simmotipo/nptui/issues/21) and [#23](https://github.com/Simmotipo/nptui/issues/23))
+- Added support for setting hostname [#22](https://github.com/Simmotipo/nptui/issues/22)
+- Added support for renaming interfaces and matching the by mac address via 'match' and 'set-name' [#20](https://github.com/Simmotipo/nptui/issues/20)
+- All interfaces added into the file automatically, inline with above detected defaults [#18](https://github.com/Simmotipo/nptui/issues/18)
+- Added option to run 'sudo netplan apply' from the main menu [#7](https://github.com/Simmotipo/nptui/issues/7)
+
 ## v1.7 | 04-06-25
 - Fix file permissions in other places too- finally truly fix [#8](https://github.com/Simmotipo/nptui/issues/8)
 - Re-order interface config page to put Addresses above Gateway (when dhcp disabled)
