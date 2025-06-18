@@ -1,5 +1,5 @@
 # nptui
-NetPlan Terminal User Interface - a primitive TUI for managing netplan configs.
+NetPlan Terminal User Interface - a primitive TUI for managing netplan configs for networkd.
 - See the Issues page before information and bug reporting / feature requesting
 - If cloning this repo, please run a dotnet build prior to running anything from the bin/Debug/net8.0/linux_x64/nptui.dll paths, etc., as there is no guarantee the built DLL (or the published binary, for that matter) will be latest.
 
@@ -27,6 +27,12 @@ sudo nptui [optional: /path/to/netplan/file]
 - Names of grayed out interfaces in the interface list are invisible / same as background colour. You have to hover over them to see them. (Looks like ConsoleColor.Black and ConsoleColor.DarkGray end up the same colour, same for ConsoleColor.Gray and ConsoleColor.White... I'll figure this out soon, promise)
 
 # Changelog
+## v3.0 | 18-06-25
+- Fixed issue where nameservers and routes were not loaded on dhcp interfaces
+- Added support for loading, editing and saving interface bonds.
+- Improved logic of when to run Console.Clear() to minimise flickering! :D
+- Added "renderer: networkd" to the netplan file, to ensure activation-mode: off always works (besides, if you're renderer is NetworkManager, you should be using _nmtui_, it's much better than this tool!)
+
 ## v2.4 | 18-06-25
 - Added cyclical backups, to automatically keep/maintain 5 rolling backups (Taken and rotated when the 'nptui' command is ran and the program starts.)
 
