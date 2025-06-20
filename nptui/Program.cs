@@ -12,8 +12,8 @@ namespace NPTUI
 {
     class NPTUI
     {
-        public static string nptui_version = "v4.0";
-        public static string nptui_date = "18-06-25";
+        public static string nptui_version = "v4.1";
+        public static string nptui_date = "19-06-25";
         public static List<Ethernet> ethernets = new List<Ethernet>();
         public static List<Bond> bonds = new List<Bond>();
         public static List<Vlan> vlans = new List<Vlan>();
@@ -83,12 +83,12 @@ namespace NPTUI
             int selected_item = 0;
             string[] menu_options = ["Edit Interfaces", "Edit Bonds", "Edit Vlans", "Edit Hostname", "About NPTUI", "Run Netplan Apply", "Exit"];
             string hostname = File.ReadAllText("/etc/hostname").Replace("\n", "");
+            Console.Clear();
             while (true)
             {
                 Console.SetCursorPosition(0, 0);
                 Console.BackgroundColor = ConsoleColor.Black;
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.Clear();
                 Console.WriteLine("\n");
                 Console.WriteLine($"    NPTUI [{nptui_version}] (netplanPath: {netplanPath})");
                 Console.WriteLine($"");
@@ -167,10 +167,10 @@ namespace NPTUI
                                 bool commitToApply = false;
                                 while (waitingForConfirmation)
                                 {
-                                    Console.Write("Are you sure you want to apply this netplan config? [Y/n] ");
+                                    Console.Write("Are you sure you want to apply this netplan config? [yes/no] ");
                                     string response = Console.ReadLine().Replace(" ", "");
-                                    if (response.ToLower() == "n") { commitToApply = false; waitingForConfirmation = false; }
-                                    else if (response == "Y") { commitToApply = true; waitingForConfirmation = false; }
+                                    if (response.ToLower() == "no") { commitToApply = false; waitingForConfirmation = false; }
+                                    else if (response.ToLower() == "yes") { commitToApply = true; waitingForConfirmation = false; }
                                 }
                                 if (commitToApply)
                                 {
@@ -191,6 +191,7 @@ namespace NPTUI
                                             process.WaitForExit();
                                             Console.WriteLine($"'netplan apply' command executed. Exit Code: {process.ExitCode}. Press ENTER to continue.");
                                             Console.ReadLine();
+                                            if (process.ExitCode == 0) { Load(netplanPath); }
                                         }
                                     }
                                     catch (Exception ex)
@@ -202,7 +203,9 @@ namespace NPTUI
                                 else
                                 {
                                     Console.WriteLine($"Netplan apply NOT executed.\nPress ENTER to continue");
+                                    Console.ReadLine();
                                 }
+                                Console.Clear();
                                 break;
                             case 6:
                                 Console.BackgroundColor = ConsoleColor.Black;
@@ -210,6 +213,8 @@ namespace NPTUI
                                 Environment.Exit(0);
                                 break;
                         }
+                        Console.BackgroundColor = ConsoleColor.Black; //To make sure we use the right colours lol
+                        Console.Clear();
                         break;
                 }
             }
@@ -2224,7 +2229,7 @@ namespace NPTUI
             "Netplan? I hardly know an.",
             "Why are we here? Just to YAML?",
             "Imagine showing netplan to a caveman.",
-            "I could have learnt netplan and yaml. Instead I wrote 1000 lines of C#.",
+            "I could have learnt netplan and yaml. Instead I wrote 2300 lines of C#.",
             "If someone could explain why I have to log into KDE plasma twice (the first hangs for 60 seconds then fails) on my Ubuntu 24.04 PC, that'd be great. Thanks.",
             "[insert imaginative and funny phrase here.]",
             "Configure? I hardly know 'er."
@@ -2272,7 +2277,7 @@ namespace NPTUI
             {
                 if (bond.macaddress == link) { return bond.name; }
             }
-            // If we haven't found a mac match amongst either the bonds or interfaces, it probably means we're looking at a bond that hasn't been applied/created yet, and link is already the name.
+            // If we haven't found a mac match amongs  t either the bonds or interfaces, it probably means we're looking at a bond that hasn't been applied/created yet, and link is already the name.
             // We've not matched an existing interface; this means we've probably been added to a bond which has not yet been netplan applied.
             // In that case, the link should be the link name. We should be able to presume this for now.
             return link;

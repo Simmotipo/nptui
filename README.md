@@ -20,13 +20,19 @@ sudo nptui [optional: /path/to/netplan/file]
 - `sudo nptui [optional: /path/to/netplan/file]`
 
 # Changelog
-## v4.0 | 18-06-25
+## v4.1 | 19-06-25
+- Update 'are you sure you want to apply' confirmation to take 'yes' or 'no' rather than 'Y' or 'n'/'N'
+- Removed the console.clear on the main menu
+- Fixed Save no pausing to prompt for enter if not saving netplan
+
+## v4.0 | 19-06-25
 - Added support for VLAN subinterfaces
 - Stopped saving config for 'lo' (this should be ignored)
 - Fixed bug where netplan was not saved immediately after deleting a bond (you had to go make another change first)
 - Added more logic of when to clear console, and reordered colour settings so that the background colour (black) is always set before the relevant console clear commands (no more flashbangs :> )
 - Ensure all EditInterface, EditVlan and EditBond menu items have PadRight(64) in them, to make the background highlighting (a little) more even
 - Added spaces where they were missing after the closing bracket of the default / current option when prompting user for text input.
+- Netplan file is reloaded after a successful netplan apply so that macaddresses for bonds can be tracked more reliably.
 
 ## v3.0 | 18-06-25
 - Fixed issue where nameservers and routes were not loaded on dhcp interfaces
