@@ -12,8 +12,8 @@ namespace NPTUI
 {
     class NPTUI
     {
-        public static string nptui_version = "v4.1";
-        public static string nptui_date = "19-06-25";
+        public static string nptui_version = "v4.2";
+        public static string nptui_date = "27-06-25";
         public static List<Ethernet> ethernets = new List<Ethernet>();
         public static List<Bond> bonds = new List<Bond>();
         public static List<Vlan> vlans = new List<Vlan>();
@@ -42,7 +42,7 @@ namespace NPTUI
                             Environment.Exit(0);
                         }
                     }
-                    catch (Exception e)
+                    catch
                     {
                         Console.WriteLine("An error occurred creating the file. Try sudo?");
                         Environment.Exit(0);
@@ -943,7 +943,7 @@ namespace NPTUI
                                 if (resp.Replace(" ", "") != "") { b.miiMonitorInterval = Convert.ToString(Convert.ToInt32(resp.Replace(" ", ""))); refreshMenuOptions = true; }
                                 else { Console.WriteLine("Invalid value; please provide a valid number. Press ENTER to continue"); Console.ReadLine(); }
                             }
-                            catch { Console.WriteLine("InvInvalid value; please provide a valid number. Press ENTER to continue"); Console.ReadLine(); }
+                            catch { Console.WriteLine("Invalid value; please provide a valid number. Press ENTER to continue"); Console.ReadLine(); }
                         }
                         else if (menu_options[selected_item].Contains("Add Interface"))
                         {
@@ -1620,7 +1620,7 @@ namespace NPTUI
             {
                 lines = File.ReadAllText(path).Split('\n');
             }
-            catch (Exception e)
+            catch
             {
                 Console.WriteLine($"An error occurred trying to read that file. Try sudo?");
                 netplanPath = "";
@@ -1748,13 +1748,12 @@ namespace NPTUI
             if (ethernets.Count > 0)
             {
                 finished_product += $"{tab}ethernets:\n";
-                foreach (Ethernet e in ethernets) if (e.name != "lo") finished_product += e.ToYaml(bonds: bonds.ToArray()) + "\n";
+                foreach (Ethernet e in ethernets) if (e.name != "lo") finished_product += e.ToYaml(bonds: bonds.ToArray(), vlans: vlans.ToArray()) + "\n";
             }
             if (bonds.Count > 0)
             {
-                Console.WriteLine($"There are {bonds.Count} bonds");
                 finished_product += $"{tab}bonds:\n";
-                foreach (Bond b in bonds) finished_product += b.ToYaml(ethernets: ethernets.ToArray()) + "\n";
+                foreach (Bond b in bonds) finished_product += b.ToYaml(ethernets: ethernets.ToArray(), vlans: vlans.ToArray()) + "\n";
             }
             if (vlans.Count > 0)
             {
@@ -1880,14 +1879,22 @@ namespace NPTUI
 
         }
 
-        public string ToYaml(Bond[] bonds, int indent = 2)
+        public string ToYaml(Bond[] bonds, Vlan[] vlans, int indent = 2)
         {
             bool isBonded = false;
             foreach (Bond bond in bonds)
             {
                 if (bond.interfaceMacs.Contains(macaddress)) {isBonded = true; break;}
             }
-            if (isBonded) { // Purge these values so we don't generate invalid netplan config as part of a bond.
+            if (!isBonded) // Not a bond, but could be on a vlan, which should have the same behaviour, so we'll reuse this variabel
+            {
+                foreach (Vlan vlan in vlans)
+                {
+                    if (vlan.link == macaddress) { isBonded = true;  break; }
+                }
+            }
+            if (isBonded)
+            { // Purge these values so we don't generate invalid netplan config as part of a bond.
                 dhcp4 = "no";
                 nameservers = new List<string>();
                 addresses = new List<string>();
@@ -2042,10 +2049,24 @@ namespace NPTUI
             }
         }
 
-        public string ToYaml(Ethernet[] ethernets, int indent = 2)
+        public string ToYaml(Ethernet[] ethernets, Vlan[] vlans, int indent = 2)
         {
             string tab = "";
             for (int i = 0; i < indent; i++) tab += " ";
+
+            bool isBonded = false;
+            foreach (Vlan vlan in vlans)
+            {
+                if (vlan.link == macaddress) { isBonded = true; break; }
+            }
+            if (isBonded)
+            { // Purge these values so we don't generate invalid netplan config as part of a vlan.
+                dhcp4 = "no";
+                nameservers = new List<string>();
+                addresses = new List<string>();
+                routes = new List<string>();
+            }
+            
             string output = $"{tab}{tab}{name}:\n{tab}{tab}{tab}dhcp4: {dhcp4}";
             if (addresses.Count() > 0 && dhcp4 == "no")
             {
@@ -2189,7 +2210,7 @@ namespace NPTUI
                     if (r.Split("%")[2] != "-1") output += $"\n{tab}{tab}{tab}{tab}  metric: {r.Split("%")[2]}";
                 }
             }
-            output += $"\n{tab}{tab}{tab}id:{id}\n{tab}{tab}{tab}link: {Utils.AttemptVlanLinkNameRecall(link, ethernets, bonds)}";
+            output += $"\n{tab}{tab}{tab}id: {id}\n{tab}{tab}{tab}link: {Utils.AttemptVlanLinkNameRecall(link, ethernets, bonds)}";
             return output;
         }
     }

@@ -20,6 +20,10 @@ sudo nptui [optional: /path/to/netplan/file]
 - `sudo nptui [optional: /path/to/netplan/file]`
 
 # Changelog
+## v4.2 | 27-06-25
+- Fix formatting of vlan's `id: ID` line to include the mising space causing indentation issues ([#29](https://github.com/Simmotipo/nptui/issues/29))
+- When an interface or bond detects it is VLAN'd, it will not automatically force DHCP to 'no', as should be the case by best practice. ([#30](https://github.com/Simmotipo/nptui/issues/30))
+
 ## v4.1 | 19-06-25
 - Update 'are you sure you want to apply' confirmation to take 'yes' or 'no' rather than 'Y' or 'n'/'N'
 - Removed the console.clear on the main menu
