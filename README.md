@@ -99,7 +99,7 @@ sudo nptui [optional: /path/to/netplan/file]
 ## v1.1 | 28-05-25
 - Can configure nameservers now
 
-# v1.0 | 28-05-25
+## v1.0 | 28-05-25
 - Can open netplan YAML files
 - Will automatically replace 'gateway4' entries with default routes.
 - Supports default route (gateway) configuration.
