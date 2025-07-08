@@ -12,7 +12,7 @@ namespace NPTUI
 {
     class NPTUI
     {
-        public static string nptui_version = "v4.4";
+        public static string nptui_version = "v4.5";
         public static string nptui_date = "08-07-25";
         public static List<Ethernet> ethernets = new List<Ethernet>();
         public static List<Bond> bonds = new List<Bond>();
@@ -801,11 +801,13 @@ namespace NPTUI
                     menuOptionsList.Add($"Name                  | {b.name}".PadRight(64));
                     menuOptionsList.Add($"Mode                  | {b.mode}".PadRight(64));
                     menuOptionsList.Add($"Mii Monitor Interval  | {b.miiMonitorInterval}ms".PadRight(64));
+                    if (b.mode == "802.3ad") menuOptionsList.Add($"LACP Rate             | {b.lacpRate}".PadRight(64));
                     for (int i = 0; i < b.interfaceMacs.Count(); i++)
                     {
                         string interfaceName = "undefined";
-                        foreach (Ethernet ethernet in ethernets) {
-                            if (ethernet.macaddress == b.interfaceMacs[i]) {interfaceName = ethernet.name; break; }
+                        foreach (Ethernet ethernet in ethernets)
+                        {
+                            if (ethernet.macaddress == b.interfaceMacs[i]) { interfaceName = ethernet.name; break; }
                         }
                         menuOptionsList.Add($"Interface {i + 1}           | {interfaceName}".PadRight(64));
                     }
@@ -927,6 +929,12 @@ namespace NPTUI
                             Console.Write($"Provide new name [{b.name}] ");
                             string resp = Console.ReadLine();
                             if (resp != "") { b.name = resp.Replace(" ", ""); refreshMenuOptions = true; }
+                        }
+                        else if (menu_options[selected_item].Contains("LACP Rate"))
+                        {
+                            if (b.lacpRate == "slow") b.lacpRate = "fast";
+                            else b.lacpRate = "slow";
+                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("IPv4 Routes"))
                         {
@@ -1948,6 +1956,8 @@ namespace NPTUI
 
         public string miiMonitorInterval;
 
+        public string lacpRate;
+
         public string macaddress;
 
         public List<string> interfaceMacs = new List<string>();
@@ -2036,6 +2046,16 @@ namespace NPTUI
             {
                 miiMonitorInterval = "100"; // default to active-passive
             }
+            if (Utils.GetLineNumber(lines, "mii-monitor-interval") > -1)
+            {
+                lacpRate = lines[Utils.GetLineNumber(lines, "mii-monitor-interval")].Split(":")[1].Replace(" ", "");
+                if (lacpRate.Replace(" ", "") == "1") lacpRate = "fast";
+                else lacpRate = "slow";
+            }
+            else
+            {
+                lacpRate = "slow"; // default to active-passive
+            }
             
             if (Utils.GetLineNumber(lines, "interfaces") > -1)
             {
@@ -2105,6 +2125,7 @@ namespace NPTUI
                 }
             }
             output += $"\n{tab}{tab}{tab}parameters:\n{tab}{tab}{tab}{tab}mode: {mode}\n{tab}{tab}{tab}{tab}mii-monitor-interval: {miiMonitorInterval}";
+            if (mode == "802.3ad") output += $"\n{tab}{tab}{tab}{tab}lacp-rate: {lacpRate}";
             return output;
         }
     }

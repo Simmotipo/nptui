@@ -20,6 +20,9 @@ sudo nptui [optional: /path/to/netplan/file]
 - `sudo nptui [optional: /path/to/netplan/file]`
 
 # Changelog
+## v4.5 | 08-07-25
+- Add support for lacp-rate on 802.3ad bonded interfaces
+
 ## v4.4 | 08-07-25
 - Fix bug resulting in interface config duplication (introduced in 4.3) - ([#33](https://github.com/Simmotipo/nptui/issues/33))
 

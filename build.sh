@@ -14,5 +14,11 @@ dotnet publish -c Release -r linux-x64 --self-contained -o ../binaries/linux-x64
 echo "Building for Linux ARM64..."
 dotnet publish -c Release -r linux-arm64 --self-contained -o ../binaries/linux-arm64
 
-# Go back to the root directory if desired
+# Go back to the root directory
 cd ../
+
+rm binaries/linux-arm64/nptui_arm
+rm binaries/linux-x85/nptui_x86
+
+cp binaries/linux-arm64/nptui binaries/linux-arm64/nptui_arm
+cp binaries/linux-x86/nptui binaries/linux-x86/nptui_x86
