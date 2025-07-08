@@ -21,7 +21,7 @@ sudo nptui [optional: /path/to/netplan/file]
 
 # Changelog
 ## v4.3 | 08-07-25
-- Exclude interfaces with "veth" or "br-" in them, to exclude docker interfaces so we don't mess with their config, until proper support is added / tested.
+- Exclude interfaces with "veth", "br-", or "docker" in them, to exclude docker interfaces so we don't mess with their config, until proper support is added / tested.
 
 ## v4.2 | 27-06-25
 - Fix formatting of vlan's `id: ID` line to include the mising space causing indentation issues ([#29](https://github.com/Simmotipo/nptui/issues/29))
