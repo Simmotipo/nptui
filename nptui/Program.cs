@@ -1708,7 +1708,7 @@ namespace NPTUI
                 if (ni.OperationalStatus == OperationalStatus.Up) activationmode = "on";
                 string macaddress = BitConverter.ToString(ni.GetPhysicalAddress().GetAddressBytes()).Replace("-", ":");
                 foreach (Ethernet ethernet in ethernets) if (ethernet.name == ni.Name || ethernet.macaddress == macaddress) { can_add = false; break; } // I know this is inefficient; I'll come back to this.
-                if (!ni.Name.ToLower().Contains("veth") && !ni.Name.ToLower().Contains("br-") && !ni.Name.ToLower().Contains("docker")) can_add = false;
+                if (ni.Name.ToLower().Contains("veth") || !ni.Name.ToLower().Contains("br-") || !ni.Name.ToLower().Contains("docker")) can_add = false;
 
                 {
                     ethernets.Add(new Ethernet($"    {ni.Name}\n      dhcp4: true\n      activation-mode: {activationmode}\n      set-name: {ni.Name}\n      match:\n        macaddress: \"{macaddress}\""));
