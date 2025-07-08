@@ -12,8 +12,8 @@ namespace NPTUI
 {
     class NPTUI
     {
-        public static string nptui_version = "v4.2";
-        public static string nptui_date = "27-06-25";
+        public static string nptui_version = "v4.3";
+        public static string nptui_date = "08-07-25";
         public static List<Ethernet> ethernets = new List<Ethernet>();
         public static List<Bond> bonds = new List<Bond>();
         public static List<Vlan> vlans = new List<Vlan>();
@@ -1644,7 +1644,8 @@ namespace NPTUI
                         if (first_pass) { workingLines += lines[i] + "\n"; first_pass = false; }
                         else
                         {
-                            ethernets.Add(new Ethernet(workingLines));
+                            Ethernet newEthernet = new Ethernet(workingLines);
+                            if (!newEthernet.name.ToLower().Contains("veth") && !newEthernet.name.ToLower().Contains("br-")) ethernets.Add(new Ethernet(workingLines));
                             workingLines = "";
                             workingLines += lines[i] + "\n";
                         }
