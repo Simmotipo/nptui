@@ -20,6 +20,9 @@ sudo nptui [optional: /path/to/netplan/file]
 - `sudo nptui [optional: /path/to/netplan/file]`
 
 # Changelog
+## v4.4 | 08-07-25
+- Fix bug resulting in interface config duplication (introduced in 4.3)
+
 ## v4.3 | 08-07-25
 - Exclude interfaces with "veth", "br-", or "docker" in them, to exclude docker interfaces so we don't mess with their config, until proper support is added / tested.
 
