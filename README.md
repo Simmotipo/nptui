@@ -20,6 +20,10 @@ sudo nptui [optional: /path/to/netplan/file]
 - `sudo nptui [optional: /path/to/netplan/file]`
 
 # Changelog
+## v4.6 | 10-07-25
+- Fixed bug where creating a Bond did not immediately save netplan config, meaning if you closed nptui before adding any other config to a newly created bond, it would not be saved. ([#36](https://github.com/Simmotipo/nptui/issues/36))
+- Fixed bugs where running a netplan apply would duplicate vlans and bonds in the edit list, due to loaded lists not being cleared upon file load. ([#35](https://github.com/Simmotipo/nptui/issues/35))
+
 ## v4.5 | 08-07-25
 - Add support for lacp-rate on 802.3ad bonded interfaces
 

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo Building...
+
 # Navigate to the project directory first, or specify the project file
 # Option 1: Navigate to project directory
 cd nptui/ || { echo "Error: nptui directory not found."; exit 1; }
@@ -18,7 +20,7 @@ dotnet publish -c Release -r linux-arm64 --self-contained -o ../binaries/linux-a
 cd ../
 
 rm binaries/linux-arm64/nptui_arm
-rm binaries/linux-x85/nptui_x86
+rm binaries/linux-x64/nptui_x64
 
 cp binaries/linux-arm64/nptui binaries/linux-arm64/nptui_arm
-cp binaries/linux-x86/nptui binaries/linux-x86/nptui_x86
+cp binaries/linux-x64/nptui binaries/linux-x64/nptui_x64

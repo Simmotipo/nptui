@@ -12,8 +12,8 @@ namespace NPTUI
 {
     class NPTUI
     {
-        public static string nptui_version = "v4.5";
-        public static string nptui_date = "08-07-25";
+        public static string nptui_version = "v4.6";
+        public static string nptui_date = "10-07-25";
         public static List<Ethernet> ethernets = new List<Ethernet>();
         public static List<Bond> bonds = new List<Bond>();
         public static List<Vlan> vlans = new List<Vlan>();
@@ -399,7 +399,7 @@ namespace NPTUI
 
                             bool can_add = true;
                             foreach (Bond bond in bonds) if (bond.name == new_name) { can_add = false; break; } // I know this is inefficient; I'll come back to this.
-                            if (can_add && new_name.Replace(" ", "") != "") bonds.Add(new Bond($"    {new_name}\n      dhcp4: yes\n      interfaces: []\n      parameters:\n        mode: active-backup", ethernets.ToArray()));
+                            if (can_add && new_name.Replace(" ", "") != "") { bonds.Add(new Bond($"    {new_name}\n      dhcp4: yes\n      interfaces: []\n      parameters:\n        mode: active-backup", ethernets.ToArray()));  Save(netplanPath, previewOnly: false); }
                             refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item] != "")
@@ -1622,6 +1622,8 @@ namespace NPTUI
         public static bool Load(string path)
         {
             ethernets = new List<Ethernet>();
+            bonds = new List<Bond>();
+            vlans = new List<Vlan>();
             Console.WriteLine($"Loading netplan config from {path}");
             string[] lines = [];
             try
@@ -1716,6 +1718,7 @@ namespace NPTUI
                 if (ni.OperationalStatus == OperationalStatus.Up) activationmode = "on";
                 string macaddress = BitConverter.ToString(ni.GetPhysicalAddress().GetAddressBytes()).Replace("-", ":");
                 foreach (Ethernet ethernet in ethernets) if (ethernet.name == ni.Name || ethernet.macaddress == macaddress) { can_add = false; break; } // I know this is inefficient; I'll come back to this.
+                if (can_add) foreach (Bond bond in bonds) if (bond.name == ni.Name) {can_add = false; break; }
                 if (ni.Name.ToLower().Contains("veth") || ni.Name.ToLower().Contains("br-") || ni.Name.ToLower().Contains("docker")) can_add = false;
                 if (can_add)
                 {
@@ -2273,7 +2276,7 @@ namespace NPTUI
             "Netplan? I hardly know an.",
             "Why are we here? Just to YAML?",
             "Imagine showing netplan to a caveman.",
-            "I could have learnt netplan and yaml. Instead I wrote 2300 lines of C#.",
+            "I could have learnt netplan and yaml. Instead I wrote 2350 lines of C#.",
             "If someone could explain why I have to log into KDE plasma twice (the first hangs for 60 seconds then fails) on my Ubuntu 24.04 PC, that'd be great. Thanks.",
             "[insert imaginative and funny phrase here.]",
             "Configure? I hardly know 'er."
