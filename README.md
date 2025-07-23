@@ -21,6 +21,13 @@ sudo apt update ; sudo apt install nptui
 `sudo nptui [optional: /path/to/netplan/file]`
 
 # Changelog
+## v4.7 | 20-07-25
+- Fixed bug where lacpRate was always read from file as 'slow', regardless of actual value
+- Fixed bug where menu was not refreshed correctly after trying to configure an invalid IP address, leading to menu overlap. ([#43](https://github.com/Simmotipo/nptui/issues/43))
+- Added support for Primary Interface on active-backup bonds ([#42](https://github.com/Simmotipo/nptui/issues/42))
+- Fixed bug where you could select the headers in the interface/bond select menu ([#37](https://github.com/Simmotipo/nptui/issues/37))
+- Added a basic step to prevented simple assignment of multiple gateways across multiple interfaces. (This is rudimentary; the action is very much still possible by manually creating default routes, but this should prevent most accidental sets) ([#41](https://github.com/Simmotipo/nptui/issues/41))
+
 ## v4.6 | 10-07-25
 - Fixed bug where creating a Bond did not immediately save netplan config, meaning if you closed nptui before adding any other config to a newly created bond, it would not be saved. ([#36](https://github.com/Simmotipo/nptui/issues/36))
 - Fixed bugs where running a netplan apply would duplicate vlans and bonds in the edit list, due to loaded lists not being cleared upon file load. ([#35](https://github.com/Simmotipo/nptui/issues/35))

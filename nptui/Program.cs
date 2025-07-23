@@ -12,8 +12,8 @@ namespace NPTUI
 {
     class NPTUI
     {
-        public static string nptui_version = "v4.6";
-        public static string nptui_date = "10-07-25";
+        public static string nptui_version = "v4.7";
+        public static string nptui_date = "20-07-25";
         public static List<Ethernet> ethernets = new List<Ethernet>();
         public static List<Bond> bonds = new List<Bond>();
         public static List<Vlan> vlans = new List<Vlan>();
@@ -528,6 +528,65 @@ namespace NPTUI
         {
             int selected_item = 0;
             bool refreshMenuOptions = true;
+            bool can_edit_gateway = true;
+            foreach (Ethernet ethernet in ethernets) {
+                if (ethernet.name != e.name)
+                {
+                    bool found_gateway = false;
+                    foreach (string route in ethernet.routes)
+                    {
+                        if (route.Split("%")[0] == "default")
+                        {
+                            found_gateway = true;
+                            break;
+                        }
+                    }
+                    if (found_gateway) {
+                        can_edit_gateway = false;
+                        break;
+                    }
+                }
+            }
+            if (can_edit_gateway) {  
+                foreach (Bond ethernet in bonds) {
+                    if (ethernet.name != e.name)
+                    {
+                        bool found_gateway = false;
+                        foreach (string route in ethernet.routes)
+                        {
+                            if (route.Split("%")[0] == "default")
+                            {
+                                found_gateway = true;
+                                break;
+                            }
+                        }
+                        if (found_gateway) {
+                            can_edit_gateway = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (can_edit_gateway) {  
+                foreach (Vlan ethernet in vlans) {
+                    if (ethernet.name != e.name)
+                    {
+                        bool found_gateway = false;
+                        foreach (string route in ethernet.routes)
+                        {
+                            if (route.Split("%")[0] == "default")
+                            {
+                                found_gateway = true;
+                                break;
+                            }
+                        }
+                        if (found_gateway) {
+                            can_edit_gateway = false;
+                            break;
+                        }
+                    }
+                }
+            }
             string[] menu_options = [];
             while (true)
             {
@@ -593,6 +652,7 @@ namespace NPTUI
                     {
                         if (menu_options[i].Contains("DHCP") || menu_options[i].Contains("Nameserver") || menu_options[i].Contains("Routes") || menu_options[i].Contains("Status") || menu_options[i].Contains("Address") || menu_options[i].Contains("Gateway")) Console.ForegroundColor = ConsoleColor.DarkRed;
                     }
+                    if (!can_edit_gateway && menu_options[i].Contains("Gateway")) Console.ForegroundColor = ConsoleColor.DarkRed;
                     Console.WriteLine($"    {i + 1}. {menu_options[i].PadRight(32)}");
                 }
                 Console.BackgroundColor = ConsoleColor.Black;
@@ -670,6 +730,7 @@ namespace NPTUI
                                 else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
                             }
                             catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
+                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("Add Nameserver"))
                         {
@@ -725,7 +786,7 @@ namespace NPTUI
                         }
                         else if (menu_options[selected_item].Contains("Gateway "))
                         {
-                            if (isBonded) break;
+                            if (isBonded || !can_edit_gateway) break;
                             string current_gateway = "";
                             if (menu_options[selected_item].Contains("|")) current_gateway = menu_options[selected_item].Split("| ")[1].Split(' ')[0];
                             Console.Write($"Enter new gateway [{current_gateway}] ");
@@ -789,7 +850,65 @@ namespace NPTUI
         {
             int selected_item = 0;
             bool refreshMenuOptions = true;
-            string[] menu_options = [];
+            string[] menu_options = [];            bool can_edit_gateway = true;
+            foreach (Ethernet ethernet in ethernets) {
+                if (ethernet.name != b.name)
+                {
+                    bool found_gateway = false;
+                    foreach (string route in ethernet.routes)
+                    {
+                        if (route.Split("%")[0] == "default")
+                        {
+                            found_gateway = true;
+                            break;
+                        }
+                    }
+                    if (found_gateway) {
+                        can_edit_gateway = false;
+                        break;
+                    }
+                }
+            }
+            if (can_edit_gateway) {  
+                foreach (Bond ethernet in bonds) {
+                    if (ethernet.name != b.name)
+                    {
+                        bool found_gateway = false;
+                        foreach (string route in ethernet.routes)
+                        {
+                            if (route.Split("%")[0] == "default")
+                            {
+                                found_gateway = true;
+                                break;
+                            }
+                        }
+                        if (found_gateway) {
+                            can_edit_gateway = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (can_edit_gateway) {  
+                foreach (Vlan ethernet in vlans) {
+                    if (ethernet.name != b.name)
+                    {
+                        bool found_gateway = false;
+                        foreach (string route in ethernet.routes)
+                        {
+                            if (route.Split("%")[0] == "default")
+                            {
+                                found_gateway = true;
+                                break;
+                            }
+                        }
+                        if (found_gateway) {
+                            can_edit_gateway = false;
+                            break;
+                        }
+                    }
+                }
+            }
             while (true)
             {
                 Console.SetCursorPosition(0, 0);
@@ -802,6 +921,19 @@ namespace NPTUI
                     menuOptionsList.Add($"Mode                  | {b.mode}".PadRight(64));
                     menuOptionsList.Add($"Mii Monitor Interval  | {b.miiMonitorInterval}ms".PadRight(64));
                     if (b.mode == "802.3ad") menuOptionsList.Add($"LACP Rate             | {b.lacpRate}".PadRight(64));
+                    if (b.mode == "active-backup")
+                    {
+                        if (b.primaryInterface.Replace(" ", "") == "") menuOptionsList.Add($"Primary Interface     | ".PadRight(64));
+                        else
+                        {
+                            string interfaceName = "undefined";
+                            foreach (Ethernet ethernet in ethernets)
+                            {
+                                if (ethernet.macaddress == b.primaryInterface) { interfaceName = ethernet.name; break; }
+                            }
+                            menuOptionsList.Add($"Primary Interface     | {interfaceName}".PadRight(64));
+                        }
+                    }
                     for (int i = 0; i < b.interfaceMacs.Count(); i++)
                     {
                         string interfaceName = "undefined";
@@ -867,6 +999,7 @@ namespace NPTUI
                     {
                         if (menu_options[i].Contains("DHCP") || menu_options[i].Contains("Nameserver") || menu_options[i].Contains("Routes") || menu_options[i].Contains("Status") || menu_options[i].Contains("Address") || menu_options[i].Contains("Delete") || menu_options[i].Contains("Gateway")) Console.ForegroundColor = ConsoleColor.DarkRed;
                     }
+                    if (!can_edit_gateway && menu_options[i].Contains("Gateway")) Console.ForegroundColor = ConsoleColor.DarkRed;
                     Console.WriteLine($"    {i + 1}. {menu_options[i].PadRight(32)}");
                 }
                 Console.BackgroundColor = ConsoleColor.Black;
@@ -891,10 +1024,16 @@ namespace NPTUI
                         }
                         if (menu_options[selected_item].Contains("Interface "))
                         {
-                            string interface_name = menu_options[selected_item].Split("| ")[1].Split(' ')[0];
-                            string interface_mac = "";
-                            foreach (Ethernet ethernet in ethernets) if (ethernet.name == interface_name) { interface_mac = ethernet.macaddress; break; }
-                            if (b.interfaceMacs.Contains(interface_mac)) b.interfaceMacs.Remove(interface_mac);
+                            if (menu_options[selected_item].Contains("Primary Interface ")) b.primaryInterface = "";
+                            else {
+                                string interface_name = menu_options[selected_item].Split("| ")[1].Split(' ')[0];
+                                string interface_mac = "";
+                                foreach (Ethernet ethernet in ethernets) if (ethernet.name == interface_name) { interface_mac = ethernet.macaddress; break; }
+                                if (b.interfaceMacs.Contains(interface_mac)) {
+                                    b.interfaceMacs.Remove(interface_mac);
+                                    if (b.primaryInterface == interface_mac) b.primaryInterface = "";
+                                }
+                            }
                             refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("Nameserver "))
@@ -961,6 +1100,34 @@ namespace NPTUI
                                 foreach (Ethernet ethernet in ethernets) if (ethernet.name == ethernetNameToAdd) { b.interfaceMacs.Add(ethernet.macaddress); refreshMenuOptions = true; break; }
                             }
                         }
+                        else if (menu_options[selected_item].Contains("Primary Interface"))
+                        {
+                            string ethernetNameToAdd = InterfaceSelectMenu(includeBonded:true, includeVlaned: false, includeBonds: false);
+                            if (ethernetNameToAdd != "")
+                            {
+                                foreach (Ethernet ethernet in ethernets) {
+                                    if (ethernet.name == ethernetNameToAdd) {
+                                        bool can_add = true;
+                                        string conflict_msg = "";
+                                        foreach (Bond bond in bonds) {
+                                            if (bond.name != b.name) {
+                                                foreach (string interfaceMac in bond.interfaceMacs) {
+                                                    if (interfaceMac == ethernet.macaddress) {can_add = false; conflict_msg = $" ({bond.name})"; break;}
+                                                }
+                                                if (!can_add) break;
+                                            }
+                                        }
+                                        if (can_add) {
+                                            b.primaryInterface = ethernet.macaddress; refreshMenuOptions = true;
+                                            if (!b.interfaceMacs.Contains(ethernet.macaddress)) b.interfaceMacs.Add(b.primaryInterface);
+                                        }
+                                        else {Console.WriteLine($"This interface is already in a bond other than this one{conflict_msg}. Press enter to continue"); Console.ReadLine(); }
+                                        break;
+                                    }
+                                }
+                                refreshMenuOptions = true;
+                            }
+                        }
                         else if (menu_options[selected_item].Contains("Add Address"))
                         {
                             if (isBonded) break;
@@ -972,6 +1139,7 @@ namespace NPTUI
                                 else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
                             }
                             catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
+                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("Add Nameserver"))
                         {
@@ -1034,7 +1202,7 @@ namespace NPTUI
                         }
                         else if (menu_options[selected_item].Contains("Gateway "))
                         {
-                            if (isBonded) break;
+                            if (isBonded || !can_edit_gateway) break;
                             string current_gateway = "";
                             if (menu_options[selected_item].Contains("|")) current_gateway = menu_options[selected_item].Split("| ")[1].Split(' ')[0];
                             Console.Write($"Enter new gateway [{current_gateway}] ");
@@ -1246,6 +1414,7 @@ namespace NPTUI
                                 else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
                             }
                             catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
+                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("Link "))
                         {
@@ -1456,7 +1625,7 @@ namespace NPTUI
                     case ConsoleKey.Enter:
                     case ConsoleKey.Spacebar:
                         if (selected_item == menu_options.Length - 1) return "";
-                        else if (menu_options[selected_item] != "")
+                        else if (menu_options[selected_item] != "" && !menu_options[selected_item].Contains("--- "))
                         {
                             return menu_options[selected_item];
                         }
@@ -1961,6 +2130,8 @@ namespace NPTUI
 
         public string lacpRate;
 
+        public string primaryInterface = "";
+
         public string macaddress;
 
         public List<string> interfaceMacs = new List<string>();
@@ -2049,9 +2220,9 @@ namespace NPTUI
             {
                 miiMonitorInterval = "100"; // default to active-passive
             }
-            if (Utils.GetLineNumber(lines, "mii-monitor-interval") > -1)
+            if (Utils.GetLineNumber(lines, "lacpRate") > -1)
             {
-                lacpRate = lines[Utils.GetLineNumber(lines, "mii-monitor-interval")].Split(":")[1].Replace(" ", "");
+                lacpRate = lines[Utils.GetLineNumber(lines, "lacpRate")].Split(":")[1].Replace(" ", "");
                 if (lacpRate.Replace(" ", "") == "1") lacpRate = "fast";
                 else lacpRate = "slow";
             }
@@ -2069,6 +2240,18 @@ namespace NPTUI
                     foreach (Ethernet eth in ethernets)
                     {
                         if (eth.name == interfaceName && !interfaceMacs.Contains(eth.macaddress)) interfaceMacs.Add(eth.macaddress);
+                    }
+                }
+            }
+            if (Utils.GetLineNumber(lines, "primary") > -1)
+            {
+                string primaryInterfaceTmp = lines[Utils.GetLineNumber(lines, "primary")].Split(":")[1].Replace(" ", "");
+                foreach (Ethernet eth in ethernets)
+                {
+                    if (eth.name == primaryInterfaceTmp.Replace(" ", ""))
+                    {
+                        primaryInterface = eth.macaddress;
+                        if (!interfaceMacs.Contains(eth.macaddress)) interfaceMacs.Add(eth.macaddress);
                     }
                 }
             }
@@ -2128,6 +2311,16 @@ namespace NPTUI
                 }
             }
             output += $"\n{tab}{tab}{tab}parameters:\n{tab}{tab}{tab}{tab}mode: {mode}\n{tab}{tab}{tab}{tab}mii-monitor-interval: {miiMonitorInterval}";
+
+
+            if (primaryInterface != "" && mode == "active-backup") {
+                foreach (Ethernet ethernet in ethernets)
+                {
+                    if (ethernet.macaddress == primaryInterface) output += $"\n{tab}{tab}{tab}{tab}primary: {ethernet.name}";
+                    break;
+                }
+            }
+
             if (mode == "802.3ad") output += $"\n{tab}{tab}{tab}{tab}lacp-rate: {lacpRate}";
             return output;
         }
