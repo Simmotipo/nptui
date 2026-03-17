@@ -12,8 +12,8 @@ namespace NPTUI
 {
     class NPTUI
     {
-        public static string nptui_version = "v4.7";
-        public static string nptui_date = "20-07-25";
+        public static string nptui_version = "v4.8";
+        public static string nptui_date = "17-03-26";
         public static List<Ethernet> ethernets = new List<Ethernet>();
         public static List<Bond> bonds = new List<Bond>();
         public static List<Vlan> vlans = new List<Vlan>();
@@ -106,8 +106,8 @@ namespace NPTUI
                     }
                     Console.WriteLine($"    {i + 1}. {menu_options[i].PadRight(32)}");
                 }
-
-                switch (Console.ReadKey().Key)
+                var key = Console.ReadKey(true);
+                switch (key.Key)
                 {
                     case ConsoleKey.UpArrow:
                         selected_item -= 1;
@@ -216,6 +216,11 @@ namespace NPTUI
                         Console.BackgroundColor = ConsoleColor.Black; //To make sure we use the right colours lol
                         Console.Clear();
                         break;
+                    default:
+                        if (char.IsDigit(key.KeyChar)) {
+                            selected_item = key.KeyChar - '0' - 1;
+                        }
+                        break;
                 }
             }
         }
@@ -239,6 +244,8 @@ namespace NPTUI
                     menuOptionsList.Add("< Back To Menu");
                     menu_options = menuOptionsList.ToArray();
                     refreshMenuOptions = false;
+                    menuOptionsList.Add(" ".PadRight(64));
+                    menuOptionsList.Add(" ".PadRight(64));
                     Console.Clear();
                 }
                 Console.WriteLine("\n");
@@ -281,7 +288,8 @@ namespace NPTUI
                     }
                     Console.WriteLine($"    {i + 1}. {menu_options[i].PadRight(32)}");
                 }
-                switch (Console.ReadKey().Key)
+                var key = Console.ReadKey(true);
+                switch(key.Key)
                 {
                     case ConsoleKey.UpArrow:
                         selected_item -= 1;
@@ -319,6 +327,11 @@ namespace NPTUI
                             refreshMenuOptions = true;
                         }
                         break;
+                    default:
+                        if (char.IsDigit(key.KeyChar)) {
+                            selected_item = key.KeyChar - '0' - 1;
+                        }
+                        break;
                 }
             }
         }
@@ -342,6 +355,8 @@ namespace NPTUI
                     menuOptionsList.Add("< Back To Menu");
                     menu_options = menuOptionsList.ToArray();
                     refreshMenuOptions = false;
+                    menuOptionsList.Add(" ".PadRight(64));
+                    menuOptionsList.Add(" ".PadRight(64));
                     Console.Clear();
                 }
                 Console.SetCursorPosition(0,0);
@@ -378,7 +393,8 @@ namespace NPTUI
                     }
                     Console.WriteLine($"    {i + 1}. {menu_options[i].PadRight(32)}");
                 }
-                switch (Console.ReadKey().Key)
+                var key = Console.ReadKey(true);
+                switch (key.Key)
                 {
                     case ConsoleKey.UpArrow:
                         selected_item -= 1;
@@ -425,6 +441,11 @@ namespace NPTUI
                             refreshMenuOptions = true;
                         }
                         break;
+                    default:
+                        if (char.IsDigit(key.KeyChar)) {
+                            selected_item = key.KeyChar - '0' - 1;
+                        }
+                        break;
                 }
             }
         }
@@ -448,6 +469,8 @@ namespace NPTUI
                     menuOptionsList.Add("< Back To Menu");
                     menu_options = menuOptionsList.ToArray();
                     refreshMenuOptions = false;
+                    menuOptionsList.Add(" ".PadRight(64));
+                    menuOptionsList.Add(" ".PadRight(64));
                     Console.Clear();
                 }
                 Console.SetCursorPosition(0,0);
@@ -468,7 +491,8 @@ namespace NPTUI
                     }
                     Console.WriteLine($"    {i + 1}. {menu_options[i].PadRight(32)}");
                 }
-                switch (Console.ReadKey().Key)
+                var key = Console.ReadKey(true);
+                switch (key.Key)
                 {
                     case ConsoleKey.UpArrow:
                         selected_item -= 1;
@@ -517,6 +541,11 @@ namespace NPTUI
                                     break;
                                 }
                             }
+                        }
+                        break;
+                    default:
+                        if (char.IsDigit(key.KeyChar)) {
+                            selected_item = key.KeyChar - '0' - 1;
                         }
                         break;
                 }
@@ -625,12 +654,16 @@ namespace NPTUI
                     menuOptionsList.Add("".PadRight(64));
                     for (int i = 0; i < e.nameservers.Count(); i++) menuOptionsList.Add($"Nameserver {i + 1}          | {e.nameservers[i]}".PadRight(64));
                     menuOptionsList.Add($"+ Add Nameserver      ".PadRight(64));
+                    for (int i = 0; i < e.searchDomains.Count(); i++) menuOptionsList.Add($"Search Domain {i + 1}       | {e.searchDomains[i]}".PadRight(64));
+                    menuOptionsList.Add($"+ Add Search Domain".PadRight(64));
                     menuOptionsList.Add($"---- IPv4 Routing ".PadRight(64, '-'));
                     menuOptionsList.Add($"IPv4 Routes          | {route_count} custom route(s)".PadRight(64));
                     menuOptionsList.Add("".PadRight(64));
                     menuOptionsList.Add("< Back To Menu".PadRight(64));
                     menu_options = menuOptionsList.ToArray();
                     refreshMenuOptions = false;
+                    menuOptionsList.Add(" ".PadRight(64));
+                    menuOptionsList.Add(" ".PadRight(64));
                     Console.Clear();
                 }
                 Console.WriteLine("\n");
@@ -650,7 +683,7 @@ namespace NPTUI
                     }
                     if (isBonded)
                     {
-                        if (menu_options[i].Contains("DHCP") || menu_options[i].Contains("Nameserver") || menu_options[i].Contains("Routes") || menu_options[i].Contains("Status") || menu_options[i].Contains("Address") || menu_options[i].Contains("Gateway")) Console.ForegroundColor = ConsoleColor.DarkRed;
+                        if (menu_options[i].Contains("DHCP") || menu_options[i].Contains("Nameserver") || menu_options[i].Contains("Routes") || menu_options[i].Contains("Status") || menu_options[i].Contains("Address") || menu_options[i].Contains("Gateway") || menu_options[i].Contains("Search Domain")) Console.ForegroundColor = ConsoleColor.DarkRed;
                     }
                     if (!can_edit_gateway && menu_options[i].Contains("Gateway")) Console.ForegroundColor = ConsoleColor.DarkRed;
                     Console.WriteLine($"    {i + 1}. {menu_options[i].PadRight(32)}");
@@ -659,7 +692,8 @@ namespace NPTUI
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine($"\n    Press 'e', ENTER, or SPACE to Edit/Select entry.");
                 Console.WriteLine($"    Press 'x'. to delete entry.");
-                switch (Console.ReadKey().Key)
+                var key = Console.ReadKey(true);
+                switch (key.Key)
                 {
                     case ConsoleKey.UpArrow:
                         selected_item -= 1;
@@ -670,24 +704,31 @@ namespace NPTUI
                         if (selected_item >= menu_options.Length) selected_item = 0;
                         break;
                     case ConsoleKey.X:
-                        if (menu_options[selected_item].Contains("Address "))
-                        {
-                            e.addresses.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
-                            refreshMenuOptions = true;
-                        }
-                        else if (menu_options[selected_item].Contains("Nameserver "))
-                        {
-                            e.nameservers.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
-                            refreshMenuOptions = true;
-                        }
-                        else if (menu_options[selected_item].Contains("Gateway "))
-                        {
-                            foreach (string route in e.routes)
+                        try {
+                            if (menu_options[selected_item].Contains("Address "))
                             {
-                                if (route.Contains("default")) { e.routes.Remove(route); break; }
+                                e.addresses.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
+                                refreshMenuOptions = true;
                             }
-                            refreshMenuOptions = true;
-                        }
+                            else if (menu_options[selected_item].Contains("Search Domain "))
+                            {
+                                e.searchDomains.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
+                                refreshMenuOptions = true;
+                            }
+                            else if (menu_options[selected_item].Contains("Nameserver "))
+                            {
+                                e.nameservers.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
+                                refreshMenuOptions = true;
+                            }
+                            else if (menu_options[selected_item].Contains("Gateway "))
+                            {
+                                foreach (string route in e.routes)
+                                {
+                                    if (route.Contains("default")) { e.routes.Remove(route); break; }
+                                }
+                                refreshMenuOptions = true;
+                            }
+                        } catch {}
                         break;
                     case ConsoleKey.E:
                     case ConsoleKey.Enter:
@@ -732,6 +773,18 @@ namespace NPTUI
                             catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
                             refreshMenuOptions = true;
                         }
+                        else if (menu_options[selected_item].Contains("Add Search Domain"))
+                        {
+                            if (isBonded) break;
+                            Console.Write("Provide new domain [xxx.yyy] ");
+                            string resp = Console.ReadLine();
+                            try
+                            {
+                                if (resp.Split('.').Length > 1) { e.searchDomains.Add(resp); refreshMenuOptions = true; }
+                            }
+                            catch { Console.WriteLine("Invalid format. Press ENTER to continue"); Console.ReadLine(); }
+                            refreshMenuOptions = true;
+                        }
                         else if (menu_options[selected_item].Contains("Add Nameserver"))
                         {
                             if (isBonded) break;
@@ -760,6 +813,26 @@ namespace NPTUI
                                         refreshMenuOptions = true;
                                     }
                                     else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
+                                }
+                            }
+                            catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
+                        }
+                        else if (menu_options[selected_item].Contains("Search Domain "))
+                        {
+                            if (isBonded) break;
+                            Console.Write($"Enter new search domain [{menu_options[selected_item].Split("| ")[1].Split(' ')[0]}] ");
+                            string resp = Console.ReadLine();
+                            try
+                            {
+                                if (resp.Replace(" ", "") != "")
+                                {
+                                    if (resp.Split('.').Length > 1)
+                                    {
+                                        e.searchDomains.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
+                                        e.searchDomains.Add(resp);
+                                        refreshMenuOptions = true;
+                                    }
+                                    else { Console.WriteLine("Invalid format"); Console.ReadLine(); }
                                 }
                             }
                             catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
@@ -839,7 +912,11 @@ namespace NPTUI
                                 else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x? Press ENTER to continue"); Console.ReadLine(); }
                             }
                             catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x? Press ENTER to continue"); Console.ReadLine(); }
-
+                        }
+                        break;
+                    default:
+                        if (char.IsDigit(key.KeyChar)) {
+                            selected_item = key.KeyChar - '0' - 1;
                         }
                         break;
                 }
@@ -971,6 +1048,8 @@ namespace NPTUI
                     menuOptionsList.Add("".PadRight(64));
                     for (int i = 0; i < b.nameservers.Count(); i++) menuOptionsList.Add($"Nameserver {i + 1}          | {b.nameservers[i]}".PadRight(64));
                     menuOptionsList.Add($"+ Add Nameserver      ".PadRight(64));
+                    for (int i = 0; i < b.searchDomains.Count(); i++) menuOptionsList.Add($"Search Domain {i + 1}       | {b.searchDomains[i]}".PadRight(64));
+                    menuOptionsList.Add($"+ Add Search Domain".PadRight(64));
                     menuOptionsList.Add($"---- IPv4 Routing ".PadRight(64, '-'));
                     menuOptionsList.Add($"IPv4 Routes          | {route_count} custom route(s)".PadRight(64));
                     menuOptionsList.Add("".PadRight(64));
@@ -978,6 +1057,8 @@ namespace NPTUI
                     menuOptionsList.Add("< Back To Menu");
                     menu_options = menuOptionsList.ToArray();
                     refreshMenuOptions = false;
+                    menuOptionsList.Add(" ".PadRight(64));
+                    menuOptionsList.Add(" ".PadRight(64));
                     Console.Clear();
                 }
                 Console.WriteLine("\n");
@@ -997,7 +1078,7 @@ namespace NPTUI
                     }
                     if (isBonded)
                     {
-                        if (menu_options[i].Contains("DHCP") || menu_options[i].Contains("Nameserver") || menu_options[i].Contains("Routes") || menu_options[i].Contains("Status") || menu_options[i].Contains("Address") || menu_options[i].Contains("Delete") || menu_options[i].Contains("Gateway")) Console.ForegroundColor = ConsoleColor.DarkRed;
+                        if (menu_options[i].Contains("DHCP") || menu_options[i].Contains("Nameserver") || menu_options[i].Contains("Routes") || menu_options[i].Contains("Status") || menu_options[i].Contains("Address") || menu_options[i].Contains("Delete") || menu_options[i].Contains("Gateway") || menu_options[i].Contains("Search Domain")) Console.ForegroundColor = ConsoleColor.DarkRed;
                     }
                     if (!can_edit_gateway && menu_options[i].Contains("Gateway")) Console.ForegroundColor = ConsoleColor.DarkRed;
                     Console.WriteLine($"    {i + 1}. {menu_options[i].PadRight(32)}");
@@ -1006,7 +1087,8 @@ namespace NPTUI
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine($"\n    Press 'e', ENTER, or SPACE to Edit/Select entry.");
                 Console.WriteLine($"    Press 'x'. to delete entry.");
-                switch (Console.ReadKey().Key)
+                var key = Console.ReadKey(true);
+                switch (key.Key)
                 {
                     case ConsoleKey.UpArrow:
                         selected_item -= 1;
@@ -1017,38 +1099,45 @@ namespace NPTUI
                         if (selected_item >= menu_options.Length) selected_item = 0;
                         break;
                     case ConsoleKey.X:
-                        if (menu_options[selected_item].Contains("Address "))
-                        {
-                            b.addresses.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
-                            refreshMenuOptions = true;
-                        }
-                        if (menu_options[selected_item].Contains("Interface "))
-                        {
-                            if (menu_options[selected_item].Contains("Primary Interface ")) b.primaryInterface = "";
-                            else {
-                                string interface_name = menu_options[selected_item].Split("| ")[1].Split(' ')[0];
-                                string interface_mac = "";
-                                foreach (Ethernet ethernet in ethernets) if (ethernet.name == interface_name) { interface_mac = ethernet.macaddress; break; }
-                                if (b.interfaceMacs.Contains(interface_mac)) {
-                                    b.interfaceMacs.Remove(interface_mac);
-                                    if (b.primaryInterface == interface_mac) b.primaryInterface = "";
-                                }
-                            }
-                            refreshMenuOptions = true;
-                        }
-                        else if (menu_options[selected_item].Contains("Nameserver "))
-                        {
-                            b.nameservers.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
-                            refreshMenuOptions = true;
-                        }
-                        else if (menu_options[selected_item].Contains("Gateway "))
-                        {
-                            foreach (string route in b.routes)
+                        try {
+                            if (menu_options[selected_item].Contains("Address "))
                             {
-                                if (route.Contains("default")) { b.routes.Remove(route); break; }
+                                b.addresses.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
+                                refreshMenuOptions = true;
                             }
-                            refreshMenuOptions = true;
-                        }
+                            if (menu_options[selected_item].Contains("Interface "))
+                            {
+                                if (menu_options[selected_item].Contains("Primary Interface ")) b.primaryInterface = "";
+                                else {
+                                    string interface_name = menu_options[selected_item].Split("| ")[1].Split(' ')[0];
+                                    string interface_mac = "";
+                                    foreach (Ethernet ethernet in ethernets) if (ethernet.name == interface_name) { interface_mac = ethernet.macaddress; break; }
+                                    if (b.interfaceMacs.Contains(interface_mac)) {
+                                        b.interfaceMacs.Remove(interface_mac);
+                                        if (b.primaryInterface == interface_mac) b.primaryInterface = "";
+                                    }
+                                }
+                                refreshMenuOptions = true;
+                            }
+                            else if (menu_options[selected_item].Contains("Search Domain "))
+                            {
+                                b.searchDomains.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
+                                refreshMenuOptions = true;
+                            }
+                            else if (menu_options[selected_item].Contains("Nameserver "))
+                            {
+                                b.nameservers.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
+                                refreshMenuOptions = true;
+                            }
+                            else if (menu_options[selected_item].Contains("Gateway "))
+                            {
+                                foreach (string route in b.routes)
+                                {
+                                    if (route.Contains("default")) { b.routes.Remove(route); break; }
+                                }
+                                refreshMenuOptions = true;
+                            }
+                        } catch {}
                         break;
                     case ConsoleKey.E:
                     case ConsoleKey.Enter:
@@ -1141,6 +1230,18 @@ namespace NPTUI
                             catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
                             refreshMenuOptions = true;
                         }
+                        else if (menu_options[selected_item].Contains("Add Search Domain"))
+                        {
+                            if (isBonded) break;
+                            Console.Write("Provide new domain [xxx.yyy] ");
+                            string resp = Console.ReadLine();
+                            try
+                            {
+                                if (resp.Split('.').Length > 1) { b.searchDomains.Add(resp); refreshMenuOptions = true; }
+                            }
+                            catch { Console.WriteLine("Invalid format. Press ENTER to continue"); Console.ReadLine(); }
+                            refreshMenuOptions = true;
+                        }
                         else if (menu_options[selected_item].Contains("Add Nameserver"))
                         {
                             if (isBonded) break;
@@ -1169,6 +1270,26 @@ namespace NPTUI
                                         refreshMenuOptions = true;
                                     }
                                     else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
+                                }
+                            }
+                            catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
+                        }
+                        else if (menu_options[selected_item].Contains("Search Domain "))
+                        {
+                            if (isBonded) break;
+                            Console.Write($"Enter new search domain [{menu_options[selected_item].Split("| ")[1].Split(' ')[0]}] ");
+                            string resp = Console.ReadLine();
+                            try
+                            {
+                                if (resp.Replace(" ", "") != "")
+                                {
+                                    if (resp.Split('.').Length > 1)
+                                    {
+                                        b.searchDomains.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
+                                        b.searchDomains.Add(resp);
+                                        refreshMenuOptions = true;
+                                    }
+                                    else { Console.WriteLine("Invalid format"); Console.ReadLine(); }
                                 }
                             }
                             catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
@@ -1270,6 +1391,11 @@ namespace NPTUI
                             }
                         }
                         break;
+                    default:
+                        if (char.IsDigit(key.KeyChar)) {
+                            selected_item = key.KeyChar - '0' - 1;
+                        }
+                        break;
                 }
             }
         }
@@ -1318,6 +1444,8 @@ namespace NPTUI
                     menuOptionsList.Add("".PadRight(64));
                     for (int i = 0; i < v.nameservers.Count(); i++) menuOptionsList.Add($"Nameserver {i + 1}          | {v.nameservers[i]}".PadRight(64));
                     menuOptionsList.Add($"+ Add Nameserver      ".PadRight(64));
+                    for (int i = 0; i < v.searchDomains.Count(); i++) menuOptionsList.Add($"Search Domain {i + 1}       | {v.searchDomains[i]}".PadRight(64));
+                    menuOptionsList.Add($"+ Add Search Domain".PadRight(64));
                     menuOptionsList.Add($"---- IPv4 Routing ".PadRight(64, '-'));
                     menuOptionsList.Add($"IPv4 Routes          | {route_count} custom route(s)".PadRight(64));
                     menuOptionsList.Add("".PadRight(64));
@@ -1325,6 +1453,8 @@ namespace NPTUI
                     menuOptionsList.Add("< Back To Menu".PadRight(64));
                     menu_options = menuOptionsList.ToArray();
                     refreshMenuOptions = false;
+                    menuOptionsList.Add(" ".PadRight(64));
+                    menuOptionsList.Add(" ".PadRight(64));
                     Console.Clear();
                 }
                 Console.WriteLine("\n");
@@ -1348,7 +1478,8 @@ namespace NPTUI
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine($"\n    Press 'e', ENTER, or SPACE to Edit/Select entry.");
                 Console.WriteLine($"    Press 'x'. to delete entry.");
-                switch (Console.ReadKey().Key)
+                var key = Console.ReadKey(true);
+                switch (key.Key)
                 {
                     case ConsoleKey.UpArrow:
                         selected_item -= 1;
@@ -1359,25 +1490,32 @@ namespace NPTUI
                         if (selected_item >= menu_options.Length) selected_item = 0;
                         break;
                     case ConsoleKey.X:
-                        if (menu_options[selected_item].Contains("Address "))
-                        {
-                            v.addresses.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
-                            refreshMenuOptions = true;
-                        }
-                        else if (menu_options[selected_item].Contains("Nameserver "))
-                        {
-                            v.nameservers.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
-                            refreshMenuOptions = true;
-                        }
-                        else if (menu_options[selected_item].Contains("Gateway "))
-                        {
-                            foreach (string route in v.routes)
+                        try {
+                            if (menu_options[selected_item].Contains("Address "))
                             {
-                                if (route.Contains("default")) { v.routes.Remove(route); break; }
+                                v.addresses.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
+                                refreshMenuOptions = true;
                             }
-                            refreshMenuOptions = true;
-                        }
-                        break;
+                            else if (menu_options[selected_item].Contains("Search Domain "))
+                            {
+                                v.searchDomains.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
+                                refreshMenuOptions = true;
+                            }
+                            else if (menu_options[selected_item].Contains("Nameserver "))
+                            {
+                                v.nameservers.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
+                                refreshMenuOptions = true;
+                            }
+                            else if (menu_options[selected_item].Contains("Gateway "))
+                            {
+                                foreach (string route in v.routes)
+                                {
+                                    if (route.Contains("default")) { v.routes.Remove(route); break; }
+                                }
+                                refreshMenuOptions = true;
+                            }  
+                        } catch {}
+                        break;  
                     case ConsoleKey.E:
                     case ConsoleKey.Enter:
                     case ConsoleKey.Spacebar:
@@ -1423,6 +1561,17 @@ namespace NPTUI
 
                             refreshMenuOptions = true;
                         }
+                        else if (menu_options[selected_item].Contains("Add Search Domain"))
+                        {
+                            Console.Write("Provide new domain [xxx.yyy] ");
+                            string resp = Console.ReadLine();
+                            try
+                            {
+                                if (resp.Split('.').Length > 1) { v.searchDomains.Add(resp); refreshMenuOptions = true; }
+                            }
+                            catch { Console.WriteLine("Invalid format. Press ENTER to continue"); Console.ReadLine(); }
+                            refreshMenuOptions = true;
+                        }
                         else if (menu_options[selected_item].Contains("Add Nameserver"))
                         {
                             Console.Write("Provide new IP [x.x.x.x] ");
@@ -1449,6 +1598,25 @@ namespace NPTUI
                                         refreshMenuOptions = true;
                                     }
                                     else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
+                                }
+                            }
+                            catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
+                        }
+                        else if (menu_options[selected_item].Contains("Search Domain "))
+                        {
+                            Console.Write($"Enter new search domain [{menu_options[selected_item].Split("| ")[1].Split(' ')[0]}] ");
+                            string resp = Console.ReadLine();
+                            try
+                            {
+                                if (resp.Replace(" ", "") != "")
+                                {
+                                    if (resp.Split('.').Length > 1)
+                                    {
+                                        v.searchDomains.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
+                                        v.searchDomains.Add(resp);
+                                        refreshMenuOptions = true;
+                                    }
+                                    else { Console.WriteLine("Invalid format"); Console.ReadLine(); }
                                 }
                             }
                             catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
@@ -1546,6 +1714,11 @@ namespace NPTUI
                             }
                         }
                         break;
+                    default:
+                        if (char.IsDigit(key.KeyChar)) {
+                            selected_item = key.KeyChar - '0' - 1;
+                        }
+                        break;
                 }
             }
         }
@@ -1593,6 +1766,8 @@ namespace NPTUI
                     menuOptionsList.Add("< Back");
                     menu_options = menuOptionsList.ToArray();
                     refreshMenuOptions = false;
+                    menuOptionsList.Add(" ".PadRight(64));
+                    menuOptionsList.Add(" ".PadRight(64));
                     Console.Clear();
                 }
                 Console.WriteLine("\n");
@@ -1612,7 +1787,8 @@ namespace NPTUI
                     }
                     Console.WriteLine($"    {i + 1}. {menu_options[i].PadRight(32)}");
                 }
-                switch (Console.ReadKey().Key)
+                var key = Console.ReadKey(true);
+                switch (key.Key)
                 {
                     case ConsoleKey.UpArrow:
                         selected_item -= 1;
@@ -1628,6 +1804,11 @@ namespace NPTUI
                         else if (menu_options[selected_item] != "" && !menu_options[selected_item].Contains("--- "))
                         {
                             return menu_options[selected_item];
+                        }
+                        break;
+                    default:
+                        if (char.IsDigit(key.KeyChar)) {
+                            selected_item = key.KeyChar - '0' - 1;
                         }
                         break;
                 }
@@ -1656,6 +1837,8 @@ namespace NPTUI
                     menuOptionsList.Add("< Back To Menu");
                     menu_options = menuOptionsList.ToArray();
                     refreshMenuOptions = false;
+                    menuOptionsList.Add(" ".PadRight(64));
+                    menuOptionsList.Add(" ".PadRight(64));
                     Console.Clear();
                 }
                 Console.WriteLine("\n");
@@ -1679,7 +1862,8 @@ namespace NPTUI
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine($"\n    Press 'e', ENTER, or SPACE to Edit/Select entry.");
                 Console.WriteLine($"    Press 'x'. to delete entry.");
-                switch (Console.ReadKey().Key)
+                var key = Console.ReadKey(true);
+                switch (key.Key)
                 {
                     case ConsoleKey.UpArrow:
                         selected_item -= 1;
@@ -1774,6 +1958,11 @@ namespace NPTUI
                                 refreshMenuOptions = true;
                             }
                             catch { }
+                        }
+                        break;
+                    default:
+                        if (char.IsDigit(key.KeyChar)) {
+                            selected_item = key.KeyChar - '0' - 1;
                         }
                         break;
                 }
@@ -1976,6 +2165,7 @@ namespace NPTUI
         public List<string> addresses = new List<string>();
         public List<string> nameservers = new List<string>();
         public List<string> routes = new List<string>();
+        public List<string> searchDomains = new List<string>();
         public string name;
 
         public string activationmode;
@@ -2010,9 +2200,17 @@ namespace NPTUI
             if (Utils.GetLineNumber(lines, "nameservers") > -1)
             {
                 int i = Utils.GetLineNumber(lines, "nameservers") + 1;
-                while (!lines[i].Split(':')[0].EndsWith("addresses")) i += 1;
-                List<string> nameservers_temp = new List<string>(lines[i].Split(':')[1].Split('#')[0].Replace("[", "").Replace("]", "").Replace(" ", "").Split(","));
-                foreach (string nameserver in nameservers_temp) if (!nameservers.Contains(nameserver) && nameserver.Replace(" ", "") != "") nameservers.Add(nameserver);
+
+                if (lines[i].Split(':')[0].EndsWith("addresses")) {
+                    List<string> nameservers_temp = new List<string>(lines[i].Split(':')[1].Split('#')[0].Replace("[", "").Replace("]", "").Replace(" ", "").Split(","));
+                    foreach (string nameserver in nameservers_temp) if (!nameservers.Contains(nameserver) && nameserver.Replace(" ", "") != "") nameservers.Add(nameserver);
+                } else i -= 1;
+
+                if (lines[i+1].Split(':')[0].EndsWith("search"))
+                {
+                    List<string> sd_temp = new List<string>(lines[i+1].Split(':')[1].Split('#')[0].Replace("[", "").Replace("]", "").Replace(" ", "").Split(","));
+                    foreach (string searchDomain in sd_temp) if (!searchDomains.Contains(searchDomain) && searchDomain.Replace(" ", "") != "") searchDomains.Add(searchDomain);
+                }
             }
             if (Utils.GetLineNumber(lines, "routes") > -1)
             {
@@ -2079,6 +2277,7 @@ namespace NPTUI
             { // Purge these values so we don't generate invalid netplan config as part of a bond.
                 dhcp4 = "no";
                 nameservers = new List<string>();
+                searchDomains = new List<string>();
                 addresses = new List<string>();
                 routes = new List<string>();
                 activationmode = "on";
@@ -2091,11 +2290,19 @@ namespace NPTUI
                 output += $"\n{tab}{tab}{tab}addresses: ";
                 foreach (string s in addresses) output += $"\n{tab}{tab}{tab}{tab}- {s}";
             }
+            if (nameservers.Count > 0 || searchDomains.Count > 0) output += $"\n{tab}{tab}{tab}nameservers:";
             if (nameservers.Count > 0)
             {
-                output += $"\n{tab}{tab}{tab}nameservers:\n{tab}{tab}{tab}{tab}addresses: [";
+                output += $"\n{tab}{tab}{tab}{tab}addresses: [";
                 foreach (string s in nameservers) output += s + ",";
-                if (nameservers.Count > 0) output = output.TrimEnd(',');
+                output = output.TrimEnd(',');
+                output += "]";
+            }
+            if (searchDomains.Count() > 0)
+            {
+                output += $"\n{tab}{tab}{tab}{tab}search: [";
+                foreach (string s in searchDomains) output += s + ",";
+                output = output.TrimEnd(',');
                 output += "]";
             }
             if (routes.Count > 0)
@@ -2107,7 +2314,7 @@ namespace NPTUI
                     if (r.Split("%")[2] != "-1") output += $"\n{tab}{tab}{tab}{tab}  metric: {r.Split("%")[2]}";
                 }
             }
-            output += $"\n{tab}{tab}{tab}match:\n{tab}{tab}{tab}{tab}macaddress: \"{macaddress}\"\n{tab}{tab}{tab}set-name: {name}";
+            if (!File.Exists($"/sys/class/net/{name}/uevent")) output += $"\n{tab}{tab}{tab}match:\n{tab}{tab}{tab}{tab}macaddress: \"{macaddress}\"\n{tab}{tab}{tab}set-name: {name}";
             if (activationmode == "off") output += $"\n{tab}{tab}{tab}activation-mode: {activationmode}";
             return output;
         }
@@ -2119,6 +2326,7 @@ namespace NPTUI
         public List<string> addresses = new List<string>();
         public List<string> nameservers = new List<string>();
         public List<string> routes = new List<string>();
+        public List<string> searchDomains = new List<string>();
         public string name;
 
         public string mode;
@@ -2163,9 +2371,17 @@ namespace NPTUI
             if (Utils.GetLineNumber(lines, "nameservers") > -1)
             {
                 int i = Utils.GetLineNumber(lines, "nameservers") + 1;
-                while (!lines[i].Split(':')[0].EndsWith("addresses")) i += 1;
-                List<string> nameservers_temp = new List<string>(lines[i].Split(':')[1].Split('#')[0].Replace("[", "").Replace("]", "").Replace(" ", "").Split(","));
-                foreach (string nameserver in nameservers_temp) if (!nameservers.Contains(nameserver) && nameserver.Replace(" ", "") != "") nameservers.Add(nameserver);
+
+                if (lines[i].Split(':')[0].EndsWith("addresses")) {
+                    List<string> nameservers_temp = new List<string>(lines[i].Split(':')[1].Split('#')[0].Replace("[", "").Replace("]", "").Replace(" ", "").Split(","));
+                    foreach (string nameserver in nameservers_temp) if (!nameservers.Contains(nameserver) && nameserver.Replace(" ", "") != "") nameservers.Add(nameserver);
+                } else i -= 1;
+
+                if (lines[i+1].Split(':')[0].EndsWith("search"))
+                {
+                    List<string> sd_temp = new List<string>(lines[i+1].Split(':')[1].Split('#')[0].Replace("[", "").Replace("]", "").Replace(" ", "").Split(","));
+                    foreach (string searchDomain in sd_temp) if (!searchDomains.Contains(searchDomain) && searchDomain.Replace(" ", "") != "") searchDomains.Add(searchDomain);
+                }
             }
             if (Utils.GetLineNumber(lines, "routes") > -1)
             {
@@ -2271,6 +2487,7 @@ namespace NPTUI
             { // Purge these values so we don't generate invalid netplan config as part of a vlan.
                 dhcp4 = "no";
                 nameservers = new List<string>();
+                searchDomains = new List<string>();
                 addresses = new List<string>();
                 routes = new List<string>();
             }
@@ -2281,11 +2498,19 @@ namespace NPTUI
                 output += $"\n{tab}{tab}{tab}addresses: ";
                 foreach (string s in addresses) output += $"\n{tab}{tab}{tab}{tab}- {s}";
             }
-            if (nameservers.Count > 0)
+            if (nameservers.Count > 0 || searchDomains.Count > 0) output += $"\n{tab}{tab}{tab}nameservers:";
+            if (nameservers.Count > 0 && dhcp4 == "no")
             {
-                output += $"\n{tab}{tab}{tab}nameservers:\n{tab}{tab}{tab}{tab}addresses: [";
+                output += $"\n{tab}{tab}{tab}{tab}addresses: [";
                 foreach (string s in nameservers) output += s + ",";
-                if (nameservers.Count > 0) output = output.TrimEnd(',');
+                output = output.TrimEnd(',');
+                output += "]";
+            }
+            if (searchDomains.Count() > 0)
+            {
+                output += $"\n{tab}{tab}{tab}{tab}search: [";
+                foreach (string s in searchDomains) output += s + ",";
+                output = output.TrimEnd(',');
                 output += "]";
             }
             if (interfaceMacs.Count > 0)
@@ -2332,6 +2557,7 @@ namespace NPTUI
         public List<string> addresses = new List<string>();
         public List<string> nameservers = new List<string>();
         public List<string> routes = new List<string>();
+        public List<string> searchDomains = new List<string>();
         public string name;
 
         public string id;
@@ -2364,9 +2590,17 @@ namespace NPTUI
             if (Utils.GetLineNumber(lines, "nameservers") > -1)
             {
                 int i = Utils.GetLineNumber(lines, "nameservers") + 1;
-                while (!lines[i].Split(':')[0].EndsWith("addresses")) i += 1;
-                List<string> nameservers_temp = new List<string>(lines[i].Split(':')[1].Split('#')[0].Replace("[", "").Replace("]", "").Replace(" ", "").Split(","));
-                foreach (string nameserver in nameservers_temp) if (!nameservers.Contains(nameserver) && nameserver.Replace(" ", "") != "") nameservers.Add(nameserver);
+
+                if (lines[i].Split(':')[0].EndsWith("addresses")) {
+                    List<string> nameservers_temp = new List<string>(lines[i].Split(':')[1].Split('#')[0].Replace("[", "").Replace("]", "").Replace(" ", "").Split(","));
+                    foreach (string nameserver in nameservers_temp) if (!nameservers.Contains(nameserver) && nameserver.Replace(" ", "") != "") nameservers.Add(nameserver);
+                } else i -= 1;
+
+                if (lines[i+1].Split(':')[0].EndsWith("search"))
+                {
+                    List<string> sd_temp = new List<string>(lines[i+1].Split(':')[1].Split('#')[0].Replace("[", "").Replace("]", "").Replace(" ", "").Split(","));
+                    foreach (string searchDomain in sd_temp) if (!searchDomains.Contains(searchDomain) && searchDomain.Replace(" ", "") != "") searchDomains.Add(searchDomain);
+                }
             }
             if (Utils.GetLineNumber(lines, "routes") > -1)
             {
@@ -2413,11 +2647,19 @@ namespace NPTUI
                 output += $"\n{tab}{tab}{tab}addresses: ";
                 foreach (string s in addresses) output += $"\n{tab}{tab}{tab}{tab}- {s}";
             }
+            if (nameservers.Count > 0 || searchDomains.Count > 0) output += $"\n{tab}{tab}{tab}nameservers:";
             if (nameservers.Count > 0)
             {
-                output += $"\n{tab}{tab}{tab}nameservers:\n{tab}{tab}{tab}{tab}addresses: [";
+                output += $"\n{tab}{tab}{tab}{tab}addresses: [";
                 foreach (string s in nameservers) output += s + ",";
-                if (nameservers.Count > 0) output = output.TrimEnd(',');
+                output = output.TrimEnd(',');
+                output += "]";
+            }
+            if (searchDomains.Count() > 0)
+            {
+                output += $"\n{tab}{tab}{tab}{tab}search: [";
+                foreach (string s in searchDomains) output += s + ",";
+                output = output.TrimEnd(',');
                 output += "]";
             }
             if (routes.Count > 0)
@@ -2469,7 +2711,7 @@ namespace NPTUI
             "Netplan? I hardly know an.",
             "Why are we here? Just to YAML?",
             "Imagine showing netplan to a caveman.",
-            "I could have learnt netplan and yaml. Instead I wrote 2350 lines of C#.",
+            "I could have learnt netplan and yaml. Instead I wrote 2786 lines of C#.",
             "If someone could explain why I have to log into KDE plasma twice (the first hangs for 60 seconds then fails) on my Ubuntu 24.04 PC, that'd be great. Thanks.",
             "[insert imaginative and funny phrase here.]",
             "Configure? I hardly know 'er."

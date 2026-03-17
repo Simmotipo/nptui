@@ -21,6 +21,12 @@ sudo apt update ; sudo apt install nptui
 `sudo nptui [optional: /path/to/netplan/file]`
 
 # Changelog
+## v4.8 | 17-03-26
+- No longer include set-name and match/macaddress in config when name is not changed ([#48](https://github.com/Simmotipo/nptui/issues/48))
+- Fixed issue where the key you pressed (if not an arrow key) was printed at bottom of menu
+- Added support for switching to menu item by number key (for 1 - 9) ([#46](https://github.com/Simmotipo/nptui/issues/46))
+- Added support for search domains on interfaces, bonds and vlans
+
 ## v4.7 | 20-07-25
 - Fixed bug where lacpRate was always read from file as 'slow', regardless of actual value
 - Fixed bug where menu was not refreshed correctly after trying to configure an invalid IP address, leading to menu overlap. ([#43](https://github.com/Simmotipo/nptui/issues/43))
