@@ -21,6 +21,11 @@ sudo apt update ; sudo apt install nptui
 `sudo nptui [optional: /path/to/netplan/file]`
 
 # Changelog
+## v4.9 | 27-04-26
+- Fixed issue where backups were always cycled into /etc/netplan, even if editing a file not in that directory (#51)
+- Fixed issue where lcap-rate would revert to 'slow' regardless of what it was set to previously (#50)
+- Fixed issue where a bond would only have its primary interface written if the primary interface was the first in the list (#49)
+
 ## v4.8 | 17-03-26
 - No longer include set-name and match/macaddress in config when name is not changed ([#48](https://github.com/Simmotipo/nptui/issues/48))
 - Fixed issue where the key you pressed (if not an arrow key) was printed at bottom of menu
