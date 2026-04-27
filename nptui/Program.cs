@@ -12,8 +12,8 @@ namespace NPTUI
 {
     class NPTUI
     {
-        public static string nptui_version = "v4.8";
-        public static string nptui_date = "17-03-26";
+        public static string nptui_version = "v4.9";
+        public static string nptui_date = "27-04-26";
         public static List<Ethernet> ethernets = new List<Ethernet>();
         public static List<Bond> bonds = new List<Bond>();
         public static List<Vlan> vlans = new List<Vlan>();
@@ -22,7 +22,7 @@ namespace NPTUI
         {
             Console.Clear();
             netplanPath = "";
-            if (args.Length > 0) netplanPath = args[0];
+            if (args.Length > 0) netplanPath = Path.GetFullPath(args[0]);
             else netplanPath = "/etc/netplan/25-nptui.yaml";
             if (netplanPath != "")
             {
@@ -31,11 +31,11 @@ namespace NPTUI
                 {
                     try
                     {
-                        if (netplanPath.StartsWith('/')) if (!Load(netplanPath))
-                            {
-                                Console.WriteLine("An error occurred creating the file. Try sudo?");
-                                Environment.Exit(0);
-                            }
+                        if (!Load(netplanPath))
+                        {
+                            Console.WriteLine("An error occurred creating the file. Try sudo?");
+                            Environment.Exit(0);
+                        }
                         if (!Save(netplanPath, previewOnly: false))
                         {
                             Console.WriteLine("An error occurred creating the file. Try sudo?");
@@ -51,7 +51,7 @@ namespace NPTUI
                 else
                 {
                     Console.WriteLine($"No such file {netplanPath}. Would you like to create one? [Y/n]");
-                    if (netplanPath == "/etc/netplan/25-nptui.yaml" || Console.ReadKey().Key == ConsoleKey.Y)
+                    if (Console.ReadKey().Key == ConsoleKey.Y)
                     {
                         if (!Utils.CycleBackups(netplanPath)) { Console.WriteLine("Could not create backup configs, quitting. Try sudo next time"); Environment.Exit(0); }
                         try
@@ -72,10 +72,7 @@ namespace NPTUI
                 }
             }
             else netplanPath = "";
-
-
             MainMenu();
-
         }
 
         public static void MainMenu()
@@ -2436,10 +2433,10 @@ namespace NPTUI
             {
                 miiMonitorInterval = "100"; // default to active-passive
             }
-            if (Utils.GetLineNumber(lines, "lacpRate") > -1)
+            if (Utils.GetLineNumber(lines, "lacp-rate") > -1)
             {
-                lacpRate = lines[Utils.GetLineNumber(lines, "lacpRate")].Split(":")[1].Replace(" ", "");
-                if (lacpRate.Replace(" ", "") == "1") lacpRate = "fast";
+                lacpRate = lines[Utils.GetLineNumber(lines, "lacp-rate")].Split(":")[1].Replace(" ", "");
+                if (lacpRate.Replace(" ", "") == "1" || lacpRate.ToLower().Contains("fast")) lacpRate = "fast";
                 else lacpRate = "slow";
             }
             else
@@ -2541,8 +2538,7 @@ namespace NPTUI
             if (primaryInterface != "" && mode == "active-backup") {
                 foreach (Ethernet ethernet in ethernets)
                 {
-                    if (ethernet.macaddress == primaryInterface) output += $"\n{tab}{tab}{tab}{tab}primary: {ethernet.name}";
-                    break;
+                    if (ethernet.macaddress == primaryInterface) {output += $"\n{tab}{tab}{tab}{tab}primary: {ethernet.name}"; break;}
                 }
             }
 
@@ -2731,22 +2727,33 @@ namespace NPTUI
         {
             try
             {
-                string pathKey = path.Split('/')[path.Split('/').Length - 1];
+                string fullPath = Path.GetFullPath(path);
+                string directory = Path.GetDirectoryName(fullPath);
+                string fileName = Path.GetFileName(fullPath);
+
+                if (string.IsNullOrEmpty(directory) || string.IsNullOrEmpty(fileName)) return false;
                 for (int i = 4; i >= 0; i--)
                 {
-                    if (File.Exists($"/etc/netplan/{pathKey}.bak-{i}"))
+                    string currentBak = Path.Combine(directory, $"{fileName}.bak-{i}");
+                    string nextBak = Path.Combine(directory, $"{fileName}.bak-{i + 1}");
+
+                    if (File.Exists(currentBak))
                     {
-                        if (File.Exists($"/etc/netplan/{pathKey}.bak-{i + 1}")) File.Delete($"/etc/netplan/{pathKey}.bak-{i + 1}");
-                        File.Move($"/etc/netplan/{pathKey}.bak-{i}", $"/etc/netplan/{pathKey}.bak-{i + 1}");
+                        if (File.Exists(nextBak)) File.Delete(nextBak);
+                        File.Move(currentBak, nextBak);
                     }
                 }
-                if (File.Exists($"/etc/netplan/{pathKey}"))
+                if (File.Exists(fullPath))
                 {
-                    File.Copy($"/etc/netplan/{pathKey}", $"/etc/netplan/{pathKey}.bak-{0}");
+                    string firstBak = Path.Combine(directory, $"{fileName}.bak-0");
+                    File.Copy(fullPath, firstBak);
                 }
                 return true;
             }
-            catch { return false; }
+            catch 
+            { 
+                return false; 
+            }
         }
 
         public static string AttemptVlanLinkNameRecall(string link, Ethernet[] ethernets, Bond[] bonds)
