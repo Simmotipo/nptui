@@ -3,6 +3,9 @@ NetPlan Terminal User Interface - a primitive TUI for managing netplan configs f
 - See the Issues page before information and bug reporting / feature requesting
 - If cloning this repo, please run a dotnet build prior to running anything from the bin/Debug/net8.0/linux_x64/nptui.dll paths, etc., as there is no guarantee the built DLL (or the published binary, for that matter) will be latest.
 
+# Why Use `NPTUI`?
+Ubuntu Server 16 and newer has used `networkd` as the engine for managing network config, driven by `netplan`. `nptui` is a terminal user interface wrapper for creating and managing netplan config, making the use of `networkd` easier! If you have reason to use `networkd` - whether that's because it is default on your OS, or simply more stable - then hopefully `nptui` will help make that experience more seamless :)
+
 # Installation and Usage
 ## Method 1: Via apt:
 ```
