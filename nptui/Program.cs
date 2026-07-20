@@ -12,8 +12,8 @@ namespace NPTUI
 {
     class NPTUI
     {
-        public static string nptui_version = "v4.9";
-        public static string nptui_date = "27-04-26";
+        public static string nptui_version = "v4.10";
+        public static string nptui_date = "20-07-26";
         public static List<Ethernet> ethernets = new List<Ethernet>();
         public static List<Bond> bonds = new List<Bond>();
         public static List<Vlan> vlans = new List<Vlan>();
@@ -2238,7 +2238,8 @@ namespace NPTUI
                 {
                     if (ni.Name == name)
                     {
-                        macaddress = BitConverter.ToString(ni.GetPhysicalAddress().GetAddressBytes()).Replace("-", ":");
+                        try {macaddress = File.ReadAllText($"/sys/class/net/{ni.Name}/bonding_slave/perm_hwaddr").Trim();} // This will succeed when interface is in a bond
+                        catch {macaddress = BitConverter.ToString(ni.GetPhysicalAddress().GetAddressBytes()).Replace("-", ":");} // This will succeed when interface is NOT in a bond
                         found_interface = true;
                         break;
                     }
@@ -2452,6 +2453,7 @@ namespace NPTUI
                 {
                     foreach (Ethernet eth in ethernets)
                     {
+                        Console.WriteLine($"Comparing {eth.name} to {interfaceName} || mac- {eth.macaddress}");
                         if (eth.name == interfaceName && !interfaceMacs.Contains(eth.macaddress)) interfaceMacs.Add(eth.macaddress);
                     }
                 }

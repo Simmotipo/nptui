@@ -24,6 +24,9 @@ sudo apt update ; sudo apt install nptui
 `sudo nptui [optional: /path/to/netplan/file]`
 
 # Changelog
+## v4.10 | 20-07-26
+- Fixed issue where interfaces in bonds would not be shown in the bond menu sometimes. ([#52](https://github.com/Simmotipo/nptui/issues/52))
+
 ## v4.9 | 27-04-26
 - Fixed issue where backups were always cycled into /etc/netplan, even if editing a file not in that directory ([#51](https://github.com/Simmotipo/nptui/issues/51))
 - Fixed issue where lcap-rate would revert to 'slow' regardless of what it was set to previously ([#50](https://github.com/Simmotipo/nptui/issues/50))

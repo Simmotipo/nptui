@@ -1,26 +1,55 @@
 #!/bin/bash
+set -e # Exit immediately if a command exits with a non-zero status
 
-echo Building...
+# Default build flags
+BUILD_X64=true
+BUILD_ARM=true
 
-# Navigate to the project directory first, or specify the project file
-# Option 1: Navigate to project directory
+# Parse command-line argument if provided
+if [ $# -gt 0 ]; then
+    case "$1" in
+        x64|--x64)
+            BUILD_ARM=false
+            ;;
+        arm|arm64|--arm|--arm64)
+            BUILD_X64=false
+            ;;
+        *)
+            echo "Error: Unknown argument '$1'. Usage: $0 [x64|arm]"
+            exit 1
+            ;;
+    esac
+fi
+
+echo "Building..."
+
 cd nptui/ || { echo "Error: nptui directory not found."; exit 1; }
 
-echo "Building for Linux x64..."
-dotnet publish -c Release -r linux-x64 --self-contained -o ../binaries/linux-x64
+# Build x64
+if [ "$BUILD_X64" = true ]; then
+    echo "Building for Linux x64..."
+    dotnet publish -c Release -r linux-x64 --self-contained -o ../binaries/linux-x64
+fi
 
-# Add the previously discussed fix for self-extracting native libraries
-# This should be in your .csproj already, but ensure it is:
-# <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-
-echo "Building for Linux ARM64..."
-dotnet publish -c Release -r linux-arm64 --self-contained -o ../binaries/linux-arm64
+# Build ARM64
+if [ "$BUILD_ARM" = true ]; then
+    echo "Building for Linux ARM64..."
+    dotnet publish -c Release -r linux-arm64 --self-contained -o ../binaries/linux-arm64
+fi
 
 # Go back to the root directory
 cd ../
 
-rm binaries/linux-arm64/nptui_arm
-rm binaries/linux-x64/nptui_x64
+# Clean up & rename x64 binary
+if [ "$BUILD_X64" = true ]; then
+    rm -f binaries/linux-x64/nptui_x64
+    cp binaries/linux-x64/nptui binaries/linux-x64/nptui_x64
+fi
 
-cp binaries/linux-arm64/nptui binaries/linux-arm64/nptui_arm
-cp binaries/linux-x64/nptui binaries/linux-x64/nptui_x64
+# Clean up & rename ARM binary
+if [ "$BUILD_ARM" = true ]; then
+    rm -f binaries/linux-arm64/nptui_arm
+    cp binaries/linux-arm64/nptui binaries/linux-arm64/nptui_arm
+fi
+
+echo "Build complete!"
