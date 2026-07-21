@@ -24,6 +24,9 @@ sudo apt update ; sudo apt install nptui
 `sudo nptui [optional: /path/to/netplan/file]`
 
 # Changelog
+## v4.11 | 21-07-26
+- Fixed issue where screen was not cleared/refreshed in certain cases where it should have been ([#53](https://github.com/Simmotipo/nptui/issues/53))
+
 ## v4.10 | 20-07-26
 - Fixed issue where interfaces in bonds would not be shown in the bond menu sometimes. ([#52](https://github.com/Simmotipo/nptui/issues/52))
 

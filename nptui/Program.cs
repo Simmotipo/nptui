@@ -12,8 +12,8 @@ namespace NPTUI
 {
     class NPTUI
     {
-        public static string nptui_version = "v4.10";
-        public static string nptui_date = "20-07-26";
+        public static string nptui_version = "v4.11";
+        public static string nptui_date = "21-07-26";
         public static List<Ethernet> ethernets = new List<Ethernet>();
         public static List<Bond> bonds = new List<Bond>();
         public static List<Vlan> vlans = new List<Vlan>();
@@ -736,26 +736,23 @@ namespace NPTUI
                             if (isBonded) break;
                             if (e.dhcp4 == "yes") e.dhcp4 = "no";
                             else e.dhcp4 = "yes";
-                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("Interface Status"))
                         {
                             if (isBonded) break;
                             if (e.activationmode == "on") e.activationmode = "off";
                             else e.activationmode = "on";
-                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("Name "))
                         {
-                            Console.Write($"Provide new name [{e.name}] ");
                             string resp = Console.ReadLine();
+                            Console.Write($"Provide new name [{e.name}] ");
                             if (resp != "") { e.name = resp.Replace(" ", ""); refreshMenuOptions = true; }
                         }
                         else if (menu_options[selected_item].Contains("IPv4 Routes"))
                         {
                             if (isBonded) break;
                             EditRoutes(e.routes);
-                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("Add Address"))
                         {
@@ -768,7 +765,6 @@ namespace NPTUI
                                 else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
                             }
                             catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
-                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("Add Search Domain"))
                         {
@@ -780,7 +776,6 @@ namespace NPTUI
                                 if (resp.Split('.').Length > 1) { e.searchDomains.Add(resp); refreshMenuOptions = true; }
                             }
                             catch { Console.WriteLine("Invalid format. Press ENTER to continue"); Console.ReadLine(); }
-                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("Add Nameserver"))
                         {
@@ -807,7 +802,6 @@ namespace NPTUI
                                     {
                                         e.addresses.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
                                         e.addresses.Add(resp);
-                                        refreshMenuOptions = true;
                                     }
                                     else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
                                 }
@@ -910,6 +904,7 @@ namespace NPTUI
                             }
                             catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x? Press ENTER to continue"); Console.ReadLine(); }
                         }
+                        refreshMenuOptions = true;
                         break;
                     default:
                         if (char.IsDigit(key.KeyChar)) {
@@ -1139,6 +1134,7 @@ namespace NPTUI
                     case ConsoleKey.E:
                     case ConsoleKey.Enter:
                     case ConsoleKey.Spacebar:
+                        refreshMenuOptions = true;
                         if (selected_item == menu_options.Length - 1) { Save(netplanPath, previewOnly: false); return; }
                         else if (menu_options[selected_item].Contains("Mode"))
                         {
@@ -1147,7 +1143,6 @@ namespace NPTUI
                             current_index += 1;
                             if (current_index >= b.validModes.Length) current_index = 0;
                             b.mode = b.validModes[current_index];
-                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("Name "))
                         {
@@ -1159,13 +1154,11 @@ namespace NPTUI
                         {
                             if (b.lacpRate == "slow") b.lacpRate = "fast";
                             else b.lacpRate = "slow";
-                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("IPv4 Routes"))
                         {
                             if (isBonded) break;
                             EditRoutes(b.routes); // I think we can reuse this function without changes?
-                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("Mii"))
                         {
@@ -1211,7 +1204,6 @@ namespace NPTUI
                                         break;
                                     }
                                 }
-                                refreshMenuOptions = true;
                             }
                         }
                         else if (menu_options[selected_item].Contains("Add Address"))
@@ -1225,7 +1217,6 @@ namespace NPTUI
                                 else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
                             }
                             catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
-                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("Add Search Domain"))
                         {
@@ -1237,7 +1228,6 @@ namespace NPTUI
                                 if (resp.Split('.').Length > 1) { b.searchDomains.Add(resp); refreshMenuOptions = true; }
                             }
                             catch { Console.WriteLine("Invalid format. Press ENTER to continue"); Console.ReadLine(); }
-                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("Add Nameserver"))
                         {
@@ -1316,7 +1306,6 @@ namespace NPTUI
                             if (isBonded) break;
                             if (b.dhcp4 == "yes") b.dhcp4 = "no";
                             else b.dhcp4 = "yes";
-                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("Gateway "))
                         {
@@ -1516,6 +1505,7 @@ namespace NPTUI
                     case ConsoleKey.E:
                     case ConsoleKey.Enter:
                     case ConsoleKey.Spacebar:
+                        refreshMenuOptions = true;
                         if (selected_item == menu_options.Length - 1) { Save(netplanPath, previewOnly: false); return; }
                         else if (menu_options[selected_item].Contains("Name "))
                         {
@@ -1526,7 +1516,6 @@ namespace NPTUI
                         else if (menu_options[selected_item].Contains("IPv4 Routes"))
                         {
                             EditRoutes(v.routes); // I think we can reuse this function without changes?
-                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("Id"))
                         {
@@ -1549,14 +1538,11 @@ namespace NPTUI
                                 else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
                             }
                             catch { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
-                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("Link "))
                         {
                             string new_link = InterfaceSelectMenu(includeBonded: false, includeVlaned: true, includeBonds: true); // This will be the name, now we should try to get the MAC
                             v.link = Utils.AttemptVlanLinkMacRecall(new_link, ethernets.ToArray(), bonds.ToArray());
-
-                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("Add Search Domain"))
                         {
@@ -1567,7 +1553,6 @@ namespace NPTUI
                                 if (resp.Split('.').Length > 1) { v.searchDomains.Add(resp); refreshMenuOptions = true; }
                             }
                             catch { Console.WriteLine("Invalid format. Press ENTER to continue"); Console.ReadLine(); }
-                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("Add Nameserver"))
                         {
@@ -1592,7 +1577,6 @@ namespace NPTUI
                                     {
                                         v.addresses.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
                                         v.addresses.Add(resp);
-                                        refreshMenuOptions = true;
                                     }
                                     else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x/xx? Press ENTER to continue"); Console.ReadLine(); }
                                 }
@@ -1611,7 +1595,6 @@ namespace NPTUI
                                     {
                                         v.searchDomains.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
                                         v.searchDomains.Add(resp);
-                                        refreshMenuOptions = true;
                                     }
                                     else { Console.WriteLine("Invalid format"); Console.ReadLine(); }
                                 }
@@ -1630,7 +1613,6 @@ namespace NPTUI
                                     {
                                         v.nameservers.Remove(menu_options[selected_item].Split("| ")[1].Split(' ')[0]);
                                         v.nameservers.Add(resp);
-                                        refreshMenuOptions = true;
                                     }
                                     else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x? Press ENTER to continue"); Console.ReadLine(); }
                                 }
@@ -1641,7 +1623,6 @@ namespace NPTUI
                         {
                             if (v.dhcp4 == "yes") v.dhcp4 = "no";
                             else v.dhcp4 = "yes";
-                            refreshMenuOptions = true;
                         }
                         else if (menu_options[selected_item].Contains("Gateway "))
                         {
@@ -1692,7 +1673,6 @@ namespace NPTUI
                                         }
                                         v.routes.Add($"default%{resp}%{metric_resp}");
                                     }
-                                    refreshMenuOptions = true;
                                 }
                                 else { Console.WriteLine("Invalid IP address. Did you definitely use the format x.x.x.x? Press ENTER to continue"); Console.ReadLine(); }
                             }
